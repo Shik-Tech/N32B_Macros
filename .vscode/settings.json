@@ -16,5 +16,6 @@
         "sstream": "cpp",
         "string": "cpp",
         "valarray": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
