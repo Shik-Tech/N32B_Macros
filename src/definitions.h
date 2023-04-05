@@ -2,7 +2,7 @@
   N32B Macros Firmware v6.0.0
   MIT License
 
-  Copyright (c) 2022 SHIK
+  Copyright (c) 2023 SHIK
 */
 
 /*
@@ -21,7 +21,7 @@
 
 USING_NAMESPACE_MIDI;
 
-const uint8_t firmwareVersion[] PROGMEM = {3, 6, 0};
+const uint8_t firmwareVersion[] PROGMEM = {6, 0, 0};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
@@ -57,9 +57,7 @@ enum COMMANDS_INDEXS
   LSB_INDEX = 5,
   CHANNEL_INDEX = 6,
   MODE_INDEX = 7,
-  INVERT_A_INDEX = 8,
-  INVERT_B_INDEX = 9,
-  SYSEX_INDEX = 10
+  PROPERTIES_INDEX = 8
 };
 
 enum COMMANDS
@@ -79,8 +77,7 @@ enum KNOB_MODES
   KNOB_MODE_DUAL = 2,
   KNOB_MODE_NRPN = 3,
   KNOB_MODE_RPN = 4,
-  KNOB_MODE_HIRES = 5,
-  KNOB_SYSEX = 6
+  KNOB_MODE_HIRES = 5
 };
 
 // General definitions
@@ -88,7 +85,22 @@ enum DEFINITIONS
 {
   SHIK_MANUFACTURER_ID = 32,
   NUMBER_OF_KNOBS = 32,
-  NUMBER_OF_PRESETS = 5
+  NUMBER_OF_PRESETS = 3
+};
+
+enum PROPERTIES
+{
+  INVERT_A_PROPERTY = 0,
+  INVERT_B_PROPERTY = 1,
+  USE_OWN_CHANNEL_A_PROPERTY = 2,
+  USE_OWN_CHANNEL_B_PROPERTY = 3,
+  MODE_PROPERTY = 4,
+};
+
+enum CHANNEL_NAMES
+{
+  CHANNEL_A = 1,
+  CHANNEL_B = 0
 };
 
 // Knob settings structure
@@ -96,24 +108,46 @@ struct Knob_t
 {
   uint8_t MSB;
   uint8_t LSB;
-  midi::Channel CHANNEL;
-  uint8_t MODE;
-  bool INVERT_A;
-  bool INVERT_B;
-  // byte sysExData[8];
+  uint8_t MIN_A;
+  uint8_t MIN_B;
+  uint8_t MAX_A;
+  uint8_t MAX_B;
+  uint8_t CHANNELS; // Use MSB 4-bit for Channel A, use LSB 4-bit for Channel B
+  uint8_t PROPERTIES;
+  /*
+  Using Properties to reduce storage size.
+  Bits are used as boolean values for inverts and use own channel:
+  1 - Invert A
+  2 - Invert B
+  3 - Use own channel A
+  4 - Use own channel B
+  
+  Knob mode is defined with 3 bits and need to be shifted to the right to calculate it's value:
+  5-7 - Mode value
+  */
 };
 
 // A preset struct is defining the device preset structure
 struct Preset_t
 {
-  midi::Channel channel;
   Knob_t knobInfo[32];
 };
 
+// A device struct is defining the device structure
+struct Device_t
+{
+  Preset_t activePreset{0};
+  uint16_t knobValues[32][4]{0};
+  midi::Channel globalChannel{1};
+  byte currentPresetIndex{0};
+  bool isPresetMode{false};
+};
+
 /* Device setup data */
-extern byte currentPresetNumber;
-extern Preset_t activePreset;
-extern uint16_t knobValues[32][4];
+extern Device_t device;
+// extern byte currentPresetNumber;
+// extern Preset_t activePreset;
+// extern uint16_t knobValues[32][4];
 extern float EMA_a; // EMA alpha
 
 /* Buttons variables */
@@ -124,7 +158,7 @@ extern bool isPressingAButton;
 extern bool isPressingBButton;
 
 /* Mode variables */
-extern bool isPresetMode;
+// extern bool isPresetMode;
 
 // byte index in EEPROM for the last used preset
 extern uint8_t lastUsedPresetAddress;

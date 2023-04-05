@@ -2,7 +2,7 @@
   N32B Macros Firmware v6.0.0
   MIT License
 
-  Copyright (c) 2022 SHIK
+  Copyright (c) 2023 SHIK
 */
 
 #ifndef FUNCTIONS_h
@@ -22,10 +22,9 @@ void onSerialMessage(const midi::Message<128> &);
 void updateKnob(uint8_t);
 
 void sendCCMessage(const struct Knob_t &, uint8_t, uint8_t, midi::Channel);
-void sendDualCCMessage(const struct Knob_t &, uint8_t, midi::Channel);
+void sendDualCCMessage(const struct Knob_t &, uint8_t, midi::Channel, midi::Channel);
 void sendRPM(const struct Knob_t &, uint8_t, midi::Channel);
 void sendNRPM(const struct Knob_t &, uint8_t, midi::Channel);
-void sendSysEx(const struct Knob_t &, uint8_t, uint8_t);
 
 void changeChannel(bool);
 void changePreset(bool);
@@ -35,5 +34,7 @@ void buttonPressAction(bool);
 void renderButtonFunctions();
 
 void doMidiRead();
+uint8_t extractMode(uint8_t);
+uint8_t extractChannel(uint8_t, bool);
 
 #endif

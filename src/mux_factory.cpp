@@ -2,7 +2,7 @@
   N32B Macros Firmware v6.0.0
   MIT License
 
-  Copyright (c) 2022 SHIK
+  Copyright (c) 2023 SHIK
 */
 
 #include "mux_factory.h"
@@ -29,7 +29,7 @@ void MUX_FACTORY::setSignalPin(const bool &muxIndex, const uint8_t &pin)
 void MUX_FACTORY::update(uint8_t &currentKnob)
 {
     setMultiplexer(currentKnob);
-    knobValues[currentKnob][0] = (EMA_a * read(currentKnob)) + ((1 - EMA_a) * knobValues[currentKnob][0]);
+    device.knobValues[currentKnob][0] = ((EMA_a) * read(currentKnob)) + ((1 - EMA_a) * device.knobValues[currentKnob][0]);
 }
 
 uint16_t MUX_FACTORY::read(uint8_t &currentKnob)

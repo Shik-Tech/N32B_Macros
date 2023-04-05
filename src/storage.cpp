@@ -2,7 +2,7 @@
   N32B Macros Firmware v6.0.0
   MIT License
 
-  Copyright (c) 2022 SHIK
+  Copyright (c) 2023 SHIK
 */
 
 #include "storage.h"
@@ -26,7 +26,6 @@ void formatFactory()
 
   // Create default preset
   Preset_t defaultPreset;
-  defaultPreset.channel = 1;
 
   for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
   {
@@ -34,10 +33,12 @@ void formatFactory()
 
     defaultPreset.knobInfo[indexId].MSB = i;
     defaultPreset.knobInfo[indexId].LSB = i + 32;
-    defaultPreset.knobInfo[indexId].MODE = KNOB_MODE_STANDARD;
-    defaultPreset.knobInfo[indexId].CHANNEL = 0;
-    defaultPreset.knobInfo[indexId].INVERT_A = false;
-    defaultPreset.knobInfo[indexId].INVERT_B = false;
+    defaultPreset.knobInfo[indexId].MIN_A = 0;
+    defaultPreset.knobInfo[indexId].MIN_B = 78;
+    defaultPreset.knobInfo[indexId].MAX_A = 127;
+    defaultPreset.knobInfo[indexId].MAX_B = 100;
+    defaultPreset.knobInfo[indexId].CHANNELS = B00000000;
+    defaultPreset.knobInfo[indexId].PROPERTIES = B00100000;
   }
 
   // Write the default preset to all preset slots
@@ -67,11 +68,11 @@ void loadPreset(uint8_t presetNumber)
     // Read the active preset from EEPROM
     for (uint16_t byteIndex = 0; byteIndex < sizeof(Preset_t); byteIndex++)
     {
-      ((uint8_t *)(&activePreset))[byteIndex] = EEPROM.read(baseAddress + byteIndex);
+      ((uint8_t *)(&device.activePreset))[byteIndex] = EEPROM.read(baseAddress + byteIndex);
     }
 
     // Update the last used preset
-    currentPresetNumber = presetNumber;
+    device.currentPresetIndex = presetNumber;
     n32b_display.showPresetNumber(presetNumber);
 
     // Save current preset as the active preset.
@@ -89,7 +90,7 @@ void savePreset(uint8_t presetNumber)
     // write the active preset to EEPROM
     for (uint16_t byteIndex = 0; byteIndex < sizeof(Preset_t); byteIndex++)
     {
-      EEPROM.update(baseAddress + byteIndex, ((uint8_t *)(&activePreset))[byteIndex]);
+      EEPROM.update(baseAddress + byteIndex, ((uint8_t *)(&device.activePreset))[byteIndex]);
     }
 
     n32b_display.showSaveMessage();

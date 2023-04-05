@@ -2,7 +2,7 @@
   N32B Macros Firmware v6.0.0
   MIT License
 
-  Copyright (c) 2022 SHIK
+  Copyright (c) 2023 SHIK
 */
 
 #include "sysex.h"
@@ -14,40 +14,10 @@ void processSysex(unsigned char *data, unsigned int size)
         switch (data[COMMAND_INDEX])
         {
         case SET_KNOB_MODE:
-            activePreset.knobInfo[data[KNOB_INDEX]].MODE = data[MODE_INDEX];
-            if (data[MODE_INDEX] != KNOB_SYSEX)
-            {
-                activePreset.knobInfo[data[KNOB_INDEX]].MSB = data[MSB_INDEX];
-                activePreset.knobInfo[data[KNOB_INDEX]].LSB = data[LSB_INDEX];
-                activePreset.knobInfo[data[KNOB_INDEX]].CHANNEL = data[CHANNEL_INDEX];
-                activePreset.knobInfo[data[KNOB_INDEX]].INVERT_A = data[INVERT_A_INDEX];
-                activePreset.knobInfo[data[KNOB_INDEX]].INVERT_B = data[INVERT_B_INDEX];
-            }
-            else
-            {
-                // activePreset.knobInfo[data[KNOB_INDEX]].MSB = midi::encodeSysEx(&data[SYSEX_INDEX], activePreset.knobInfo[data[KNOB_INDEX]].sysExData, sizeof(data[SYSEX_INDEX]));
-
-                /*
-                 * TODO: handle Korg special case:
-                 * https://github.com/FortySevenEffects/arduino_midi_library/blob/master/doc/sysex-codec.md
-                 */
-                // void handleSysEx(byte * inData, unsigned inSize)
-                // {
-                //     // SysEx body data starts at 3rd byte: F0 42 aa bb cc dd F7
-                //     // 42 being the hex value of the Korg SysEx ID.
-                //     const unsigned dataStartOffset = 2;
-                //     const unsigned encodedDataLength = inSize - 3; // Remove F0 42 & F7
-
-                //     // Create a large enough buffer where to decode the message
-                //     byte decodedData[64];
-
-                //     const unsigned decodedSize = decodeSysEx(inData + dataStartOffset,
-                //                                              decodedData,
-                //                                              encodedDataLength,
-                //                                              true); // flip header bits
-                //     // Do stuff with your message
-                // }
-            }
+            device.activePreset.knobInfo[data[KNOB_INDEX]].MSB = data[MSB_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].LSB = data[LSB_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = data[CHANNEL_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].PROPERTIES = data[PROPERTIES_INDEX];
             break;
         case SAVE_PRESET:
             savePreset(data[KNOB_INDEX]);
@@ -78,7 +48,7 @@ void handleChangeChannel(byte channel)
 {
     if (channel < 17 && channel > 0)
     {
-        activePreset.channel = channel;
+        device.globalChannel = channel;
     }
 }
 
@@ -102,21 +72,20 @@ void sendDeviceFirmwareVersion()
     }
     MIDICoreUSB.sendSysEx(5, data);
 }
-void sendActivePreset() {
+void sendActivePreset()
+{
     // Send current preset
     for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
     {
         uint8_t indexId = pgm_read_word_near(knobsLocation + i);
-        uint8_t presetData[9] = {
+        uint8_t presetData[7] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
             pgm_read_word_near(knobsLocation + i),
-            activePreset.knobInfo[indexId].MSB,
-            activePreset.knobInfo[indexId].LSB,
-            activePreset.knobInfo[indexId].CHANNEL,
-            activePreset.knobInfo[indexId].MODE,
-            activePreset.knobInfo[indexId].INVERT_A,
-            activePreset.knobInfo[indexId].INVERT_B};
-        MIDICoreUSB.sendSysEx(9, presetData);
+            device.activePreset.knobInfo[indexId].MSB,
+            device.activePreset.knobInfo[indexId].LSB,
+            device.activePreset.knobInfo[indexId].CHANNELS,
+            device.activePreset.knobInfo[indexId].PROPERTIES};
+        MIDICoreUSB.sendSysEx(7, presetData);
     }
 }

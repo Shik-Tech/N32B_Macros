@@ -2,7 +2,7 @@
   N32B Macros Firmware v6.0.0
   MIT License
 
-  Copyright (c) 2022 SHIK
+  Copyright (c) 2023 SHIK
 */
 
 #include "definitions.h"
@@ -17,11 +17,12 @@ ezButton buttonA(BUTTON_A_PIN);
 ezButton buttonB(BUTTON_B_PIN);
 
 /* Device setup data */
-byte currentPresetNumber = 0;
-Preset_t activePreset;
+Device_t device;
+// byte currentPresetNumber = 0;
+// Preset_t activePreset;
 
 // uint16_t bufferKnobValues[32][3];
-uint16_t knobValues[32][4] = {0};
+// uint16_t knobValues[32][4] = {0};
 float EMA_a = 0.2;
 
 /* Buttons variables */
@@ -32,7 +33,7 @@ bool isPressingAButton = false;
 bool isPressingBButton = false;
 
 /* Mode variables */
-bool isPresetMode = false;
+// bool isPresetMode = false;
 
 // byte index in EEPROM for the last used preset
 uint8_t lastUsedPresetAddress = 0;
