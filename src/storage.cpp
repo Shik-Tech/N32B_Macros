@@ -40,6 +40,7 @@ void formatFactory()
     defaultPreset.knobInfo[indexId].CHANNELS = B00000000;
     defaultPreset.knobInfo[indexId].PROPERTIES = B00100000;
   }
+  defaultPreset.thruMode = THRU_OFF;
 
   // Write the default preset to all preset slots
   uint16_t baseAddress = 1;

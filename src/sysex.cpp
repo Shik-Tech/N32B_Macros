@@ -19,6 +19,9 @@ void processSysex(unsigned char *data, unsigned int size)
             device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = data[CHANNEL_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].PROPERTIES = data[PROPERTIES_INDEX];
             break;
+        case SET_THRU_MODE:
+            setMidiThruMode(data[KNOB_INDEX]);
+            break;
         case SAVE_PRESET:
             savePreset(data[KNOB_INDEX]);
             break;
@@ -88,4 +91,8 @@ void sendActivePreset()
             device.activePreset.knobInfo[indexId].PROPERTIES};
         MIDICoreUSB.sendSysEx(7, presetData);
     }
+}
+void setMidiThruMode(byte mode)
+{
+    device.activePreset.thruMode = mode;
 }

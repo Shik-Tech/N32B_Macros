@@ -9,17 +9,22 @@
 
 void onUsbMessage(const midi::Message<128> &message)
 {
-  MIDICoreSerial.send(message);
-  n32b_display.blinkDot(2);
+  if (device.activePreset.thruMode == THRU_TRS || device.activePreset.thruMode == THRU_BOTH)
+  {
+    MIDICoreSerial.send(message);
+    n32b_display.blinkDot(2);
+  }
 }
 
 void onSerialMessage(const midi::Message<128> &message)
 {
-  // MIDICoreUSB.sendControlChange(message.data1, message.data2, message.channel);
-  if (MIDICoreSerial.getType() != midi::MidiType::ActiveSensing)
+  if (device.activePreset.thruMode == THRU_USB || device.activePreset.thruMode == THRU_BOTH)
   {
-    MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
-    n32b_display.blinkDot(2);
+    if (MIDICoreSerial.getType() != midi::MidiType::ActiveSensing)
+    {
+      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
+      n32b_display.blinkDot(2);
+    }
   }
 }
 

@@ -20,5 +20,6 @@ void handleChangeChannel(byte);
 void handleProgramChange(byte, byte);
 void sendDeviceFirmwareVersion();
 void sendActivePreset();
+void setMidiThruMode(byte);
 
 #endif

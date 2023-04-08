@@ -67,7 +67,8 @@ enum COMMANDS
   LOAD_PRESET = 3,           // Load a preset
   SEND_FIRMWARE_VERSION = 4, // Send the device firmware version
   SYNC_KNOBS = 5,            // Send active preset
-  CHANGE_CHANNEL = 6         // Changes the global MIDI channel
+  CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
+  SET_THRU_MODE = 8          // Set the midi THRU behavior
 };
 
 enum KNOB_MODES
@@ -103,6 +104,14 @@ enum CHANNEL_NAMES
   CHANNEL_B = 0
 };
 
+enum THRU_MODES
+{
+  THRU_OFF = 0,
+  THRU_TRS = 1,
+  THRU_USB = 2,
+  THRU_BOTH = 3
+};
+
 // Knob settings structure
 struct Knob_t
 {
@@ -121,7 +130,7 @@ struct Knob_t
   2 - Invert B
   3 - Use own channel A
   4 - Use own channel B
-  
+
   Knob mode is defined with 3 bits and need to be shifted to the right to calculate it's value:
   5-7 - Mode value
   */
@@ -131,6 +140,7 @@ struct Knob_t
 struct Preset_t
 {
   Knob_t knobInfo[32];
+  uint8_t thruMode;
 };
 
 // A device struct is defining the device structure
