@@ -87,7 +87,7 @@ void updateKnob(uint8_t index)
             : normalizedMSBValue;
 
     uint8_t normalizedLSBValue =
-        map(mode == KNOB_MODE_DUAL ? LSBValue : MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
+        map(mode == KNOB_MODE_MACRO ? LSBValue : MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
 
     uint8_t LSBSendValue =
         bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY)
@@ -101,8 +101,8 @@ void updateKnob(uint8_t index)
       sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       break;
 
-    case KNOB_MODE_DUAL:
-      sendDualCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
+    case KNOB_MODE_MACRO:
+      sendMacroCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
       break;
 
     case KNOB_MODE_NRPN:
@@ -141,7 +141,7 @@ void sendCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint8_t L
   n32b_display.blinkDot(1);
 }
 
-void sendDualCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel_a, midi::Channel channel_b)
+void sendMacroCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel_a, midi::Channel channel_b)
 {
   MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel_a);
   MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBvalue, channel_b);
