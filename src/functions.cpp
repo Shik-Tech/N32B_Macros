@@ -67,27 +67,50 @@ void updateKnob(uint8_t index)
 
   if (needToUpdate)
   {
+    uint8_t mode = extractMode(currentKnob.PROPERTIES);
+    midi::Channel channel_a =
+        bitRead(currentKnob.PROPERTIES, USE_OWN_CHANNEL_A_PROPERTY)
+            ? extractChannel(currentKnob.CHANNELS, CHANNEL_A)
+            : device.globalChannel;
 
-    midi::Channel channel_a = bitRead(currentKnob.PROPERTIES, USE_OWN_CHANNEL_A_PROPERTY) ? extractChannel(currentKnob.CHANNELS, CHANNEL_A) : device.globalChannel;
-    midi::Channel channel_b = bitRead(currentKnob.PROPERTIES, USE_OWN_CHANNEL_B_PROPERTY) ? extractChannel(currentKnob.CHANNELS, CHANNEL_B) : device.globalChannel;
+    midi::Channel channel_b =
+        bitRead(currentKnob.PROPERTIES, USE_OWN_CHANNEL_B_PROPERTY)
+            ? extractChannel(currentKnob.CHANNELS, CHANNEL_B)
+            : device.globalChannel;
 
-    switch (extractMode(currentKnob.PROPERTIES))
+    uint8_t normalizedMSBValue =
+        map(MSBValue, 0, 127, currentKnob.MIN_A, currentKnob.MAX_A);
+
+    uint8_t MSBSendValue =
+        bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY)
+            ? currentKnob.MAX_A - normalizedMSBValue
+            : normalizedMSBValue;
+
+    uint8_t normalizedLSBValue =
+        map(mode == KNOB_MODE_DUAL ? LSBValue : MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
+
+    uint8_t LSBSendValue =
+        bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY)
+            ? currentKnob.MAX_B - normalizedLSBValue
+            : normalizedLSBValue;
+
+    switch (mode)
     {
     case KNOB_MODE_STANDARD:
     case KNOB_MODE_HIRES:
-      sendCCMessage(currentKnob, MSBValue, LSBValue, channel_a);
+      sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       break;
 
     case KNOB_MODE_DUAL:
-      sendDualCCMessage(currentKnob, MSBValue, channel_a, channel_b);
+      sendDualCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
       break;
 
     case KNOB_MODE_NRPN:
-      sendNRPM(currentKnob, MSBValue, channel_a);
+      sendNRPM(currentKnob, MSBSendValue, channel_a);
       break;
 
     case KNOB_MODE_RPN:
-      sendRPM(currentKnob, MSBValue, channel_a);
+      sendRPM(currentKnob, MSBSendValue, channel_a);
       break;
 
     default:
@@ -102,39 +125,29 @@ void updateKnob(uint8_t index)
 
 void sendCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
 {
-  uint8_t MSBSendValue = bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY) ? 127 - MSBvalue : MSBvalue;
-  uint8_t LSBSendValue = bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY) ? 127 - LSBvalue : LSBvalue;
   if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
   {
-    MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBSendValue, channel);
-    MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBSendValue, channel);
+    MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel);
+    MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBvalue, channel);
 
-    MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBSendValue, channel);
-    MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBSendValue, channel);
+    MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBvalue, channel);
+    MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBvalue, channel);
   }
   else
   {
-    MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBSendValue, channel);
-    MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBSendValue, channel);
+    MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel);
+    MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBvalue, channel);
   }
   n32b_display.blinkDot(1);
 }
 
-void sendDualCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, midi::Channel channel_a, midi::Channel channel_b)
+void sendDualCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel_a, midi::Channel channel_b)
 {
-  uint8_t min_a = currentKnob.MIN_A;
-  uint8_t max_a = currentKnob.MAX_A;
-  uint8_t min_b = currentKnob.MIN_B;
-  uint8_t max_b = currentKnob.MAX_B;
-  uint8_t normalizedMSBValue = map(MSBvalue, 0, 127, min_a, max_a);
-  uint8_t normalizedLSBValue = map(MSBvalue, 0, 127, min_b, max_b);
-  uint8_t MSBSendValue = bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY) ? max_a - normalizedMSBValue : normalizedMSBValue;
-  uint8_t LSBSendValue = bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY) ? max_b - normalizedLSBValue : normalizedLSBValue;
-  MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBSendValue, channel_a);
-  MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBSendValue, channel_b);
+  MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel_a);
+  MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBvalue, channel_b);
 
-  MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBSendValue, channel_a);
-  MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBSendValue, channel_b);
+  MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBvalue, channel_a);
+  MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBvalue, channel_b);
 
   n32b_display.blinkDot(1);
 }
