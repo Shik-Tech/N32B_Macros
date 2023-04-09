@@ -1,5 +1,5 @@
 /*
-  N32B Macros Firmware v6.0.0
+  N32B Macros Firmware v4.0.0
   MIT License
 
   Copyright (c) 2023 SHIK

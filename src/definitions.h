@@ -1,5 +1,5 @@
 /*
-  N32B Macros Firmware v6.0.0
+  N32B Macros Firmware v4.0.0
   MIT License
 
   Copyright (c) 2023 SHIK
@@ -21,7 +21,7 @@
 
 USING_NAMESPACE_MIDI;
 
-const uint8_t firmwareVersion[] PROGMEM = {6, 0, 0};
+const uint8_t firmwareVersion[] PROGMEM = {4, 0, 0};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
