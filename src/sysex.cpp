@@ -81,16 +81,27 @@ void sendActivePreset()
     for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
     {
         uint8_t indexId = pgm_read_word_near(knobsLocation + i);
-        uint8_t presetData[7] = {
+        uint8_t knobsData[11] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
             pgm_read_word_near(knobsLocation + i),
             device.activePreset.knobInfo[indexId].MSB,
             device.activePreset.knobInfo[indexId].LSB,
             device.activePreset.knobInfo[indexId].CHANNELS,
-            device.activePreset.knobInfo[indexId].PROPERTIES};
-        MIDICoreUSB.sendSysEx(7, presetData);
+            device.activePreset.knobInfo[indexId].PROPERTIES,
+            device.activePreset.knobInfo[indexId].MIN_A,
+            device.activePreset.knobInfo[indexId].MAX_A,
+            device.activePreset.knobInfo[indexId].MIN_B,
+            device.activePreset.knobInfo[indexId].MAX_B};
+        MIDICoreUSB.sendSysEx(11, knobsData);
     }
+
+    uint8_t presetData[3] = {
+        SHIK_MANUFACTURER_ID,
+        SET_THRU_MODE,
+        device.activePreset.thruMode};
+
+    MIDICoreUSB.sendSysEx(3, presetData);
 }
 void setMidiThruMode(byte mode)
 {
