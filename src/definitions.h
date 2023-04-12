@@ -55,9 +55,12 @@ enum COMMANDS_INDEXS
   KNOB_INDEX = 3, // Also used for other commands value
   MSB_INDEX = 4,
   LSB_INDEX = 5,
-  CHANNEL_INDEX = 6,
-  MODE_INDEX = 7,
-  PROPERTIES_INDEX = 8
+  CHANNELS_INDEX = 6,
+  PROPERTIES_INDEX = 7,
+  MIN_A_INDEX = 8,
+  MAX_A_INDEX = 9,
+  MIN_B_INDEX = 10,
+  MAX_B_INDEX = 11
 };
 
 enum COMMANDS

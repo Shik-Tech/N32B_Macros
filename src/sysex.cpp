@@ -16,7 +16,11 @@ void processSysex(unsigned char *data, unsigned int size)
         case SET_KNOB_MODE:
             device.activePreset.knobInfo[data[KNOB_INDEX]].MSB = data[MSB_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].LSB = data[LSB_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = data[CHANNEL_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].MIN_A = data[MIN_A_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].MAX_A = data[MAX_A_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].MIN_B = data[MIN_B_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].MAX_B = data[MAX_B_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = data[CHANNELS_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].PROPERTIES = data[PROPERTIES_INDEX];
             break;
         case SET_THRU_MODE:
