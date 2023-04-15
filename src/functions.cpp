@@ -87,7 +87,7 @@ void updateKnob(uint8_t index)
             : normalizedMSBValue;
 
     uint8_t normalizedLSBValue =
-        map(mode == KNOB_MODE_MACRO ? LSBValue : MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
+        map(MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
 
     uint8_t LSBSendValue =
         bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY)
