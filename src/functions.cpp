@@ -162,30 +162,28 @@ void sendMacroCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint
 
 void sendNRPM(const struct Knob_t &currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
-  uint8_t MSBSendValue = bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY) ? 127 - MSBvalue : MSBvalue;
   MIDICoreSerial.sendControlChange(99, currentKnob.MSB & 0x7F, channel); // NRPN MSB
   MIDICoreUSB.sendControlChange(99, currentKnob.MSB & 0x7F, channel);    // NRPN MSB
 
   MIDICoreSerial.sendControlChange(98, currentKnob.LSB & 0x7F, channel); // NRPN LSB
   MIDICoreUSB.sendControlChange(98, currentKnob.LSB & 0x7F, channel);    // NRPN LSB
 
-  MIDICoreSerial.sendControlChange(6, MSBSendValue, channel); // Data Entry MSB
-  MIDICoreUSB.sendControlChange(6, MSBSendValue, channel);    // Data Entry MSB
+  MIDICoreSerial.sendControlChange(6, MSBvalue, channel); // Data Entry MSB
+  MIDICoreUSB.sendControlChange(6, MSBvalue, channel);    // Data Entry MSB
 
   n32b_display.blinkDot(1);
 }
 
 void sendRPM(const struct Knob_t &currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
-  uint8_t MSBSendValue = bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY) ? 127 - MSBvalue : MSBvalue;
   MIDICoreSerial.sendControlChange(101, currentKnob.MSB & 0x7F, channel); // RPN MSB
   MIDICoreUSB.sendControlChange(101, currentKnob.MSB & 0x7F, channel);    // RPN MSB
 
   MIDICoreSerial.sendControlChange(100, currentKnob.LSB & 0x7F, channel); // RPN LSB
   MIDICoreUSB.sendControlChange(100, currentKnob.LSB & 0x7F, channel);    // RPN LSB
 
-  MIDICoreSerial.sendControlChange(6, MSBSendValue, channel); // Data Entry MSB
-  MIDICoreUSB.sendControlChange(6, MSBSendValue, channel);    // Data Entry MSB
+  MIDICoreSerial.sendControlChange(6, MSBvalue, channel); // Data Entry MSB
+  MIDICoreUSB.sendControlChange(6, MSBvalue, channel);    // Data Entry MSB
 
   n32b_display.blinkDot(1);
 }
