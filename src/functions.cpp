@@ -78,21 +78,29 @@ void updateKnob(uint8_t index)
             ? extractChannel(currentKnob.CHANNELS, CHANNEL_B)
             : device.globalChannel;
 
-    uint8_t normalizedMSBValue =
-        map(MSBValue, 0, 127, currentKnob.MIN_A, currentKnob.MAX_A);
+    uint8_t MSBSendValue = map(MSBValue, 0, 127, currentKnob.MIN_A, currentKnob.MAX_A);
+    if (bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY))
+    {
+      MSBSendValue = map(MSBValue, 0, 127, currentKnob.MAX_A, currentKnob.MIN_A);
+    }
 
-    uint8_t MSBSendValue =
-        bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY)
-            ? currentKnob.MAX_A - normalizedMSBValue
-            : normalizedMSBValue;
-
-    uint8_t normalizedLSBValue =
-        map(MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
-
-    uint8_t LSBSendValue =
-        bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY)
-            ? currentKnob.MAX_B - normalizedLSBValue
-            : normalizedLSBValue;
+    uint8_t LSBSendValue;
+    if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
+    {
+      LSBSendValue = LSBValue;
+      if (bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY))
+      {
+        LSBSendValue = 127 - LSBValue;
+      }
+    }
+    else
+    {
+      LSBSendValue = map(MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
+      if (bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY))
+      {
+        LSBSendValue = map(MSBValue, 0, 127, currentKnob.MAX_B, currentKnob.MIN_B);
+      }
+    }
 
     switch (mode)
     {
