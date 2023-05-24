@@ -71,7 +71,8 @@ enum COMMANDS
   SEND_FIRMWARE_VERSION = 4, // Send the device firmware version
   SYNC_KNOBS = 5,            // Send active preset
   CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
-  SET_THRU_MODE = 8          // Set the midi THRU behavior
+  SET_THRU_MODE = 8,         // Set the midi THRU behavior
+  SET_OUTPUT_MODE = 9        // Set the midi OUTPUT behavior
 };
 
 enum KNOB_MODES
@@ -110,9 +111,18 @@ enum CHANNEL_NAMES
 enum THRU_MODES
 {
   THRU_OFF = 0,
-  THRU_TRS = 1,
-  THRU_USB = 2,
-  THRU_BOTH = 3
+  THRU_TRS_TRS = 1,
+  THRU_TRS_USB = 2,
+  THRU_USB_USB = 3,
+  THRU_USB_TRS = 4,
+  THRU_BOTH_DIRECTIONS = 5
+};
+
+enum OUTPUT_MODES
+{
+  OUTPUT_TRS = 0,
+  OUTPUT_USB = 1,
+  OUTPUT_BOTH = 2
 };
 
 // Knob settings structure
@@ -144,6 +154,7 @@ struct Preset_t
 {
   Knob_t knobInfo[32];
   uint8_t thruMode;
+  uint8_t outputMode;
 };
 
 // A device struct is defining the device structure

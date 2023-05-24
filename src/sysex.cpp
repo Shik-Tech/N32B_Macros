@@ -100,12 +100,19 @@ void sendActivePreset()
         MIDICoreUSB.sendSysEx(11, knobsData);
     }
 
-    uint8_t presetData[3] = {
+    uint8_t presetThruData[3] = {
         SHIK_MANUFACTURER_ID,
         SET_THRU_MODE,
         device.activePreset.thruMode};
 
-    MIDICoreUSB.sendSysEx(3, presetData);
+    MIDICoreUSB.sendSysEx(3, presetThruData);
+
+    uint8_t presetOutputData[3] = {
+        SHIK_MANUFACTURER_ID,
+        SET_OUTPUT_MODE,
+        device.activePreset.outputMode};
+
+    MIDICoreUSB.sendSysEx(3, presetOutputData);
 }
 void setMidiThruMode(byte mode)
 {

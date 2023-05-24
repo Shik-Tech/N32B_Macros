@@ -14,7 +14,8 @@ bool isEEPROMvalid()
   {
     uint8_t byte = EEPROM.read(EEPROM.length() - i);
     uint8_t versionDigit = pgm_read_word_near(firmwareVersion + i - 1);
-    if (!(byte == versionDigit)) return false;
+    if (!(byte == versionDigit))
+      return false;
   }
   return true;
 }
@@ -40,7 +41,8 @@ void formatFactory()
     defaultPreset.knobInfo[indexId].CHANNELS = B00000000;
     defaultPreset.knobInfo[indexId].PROPERTIES = B00100000;
   }
-  defaultPreset.thruMode = THRU_BOTH;
+  defaultPreset.thruMode = THRU_TRS_TRS;
+  defaultPreset.outputMode = OUTPUT_BOTH;
 
   // Write the default preset to all preset slots
   uint16_t baseAddress = 1;

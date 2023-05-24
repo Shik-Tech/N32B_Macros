@@ -9,22 +9,43 @@
 
 void onUsbMessage(const midi::Message<128> &message)
 {
-  if (device.activePreset.thruMode == THRU_TRS || device.activePreset.thruMode == THRU_BOTH)
+  if (message.type != midi::MidiType::ActiveSensing)
   {
-    MIDICoreSerial.send(message);
+    switch (device.activePreset.thruMode)
+    {
+    case THRU_USB_USB:
+      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
+      break;
+
+    case THRU_USB_TRS:
+      MIDICoreSerial.send(message);
+      break;
+    case THRU_BOTH_DIRECTIONS:
+      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
+      MIDICoreSerial.send(message);
+    }
     n32b_display.blinkDot(2);
   }
 }
 
 void onSerialMessage(const midi::Message<128> &message)
 {
-  if (device.activePreset.thruMode == THRU_USB || device.activePreset.thruMode == THRU_BOTH)
+  if (message.type != midi::MidiType::ActiveSensing)
   {
-    if (MIDICoreSerial.getType() != midi::MidiType::ActiveSensing)
+    switch (device.activePreset.thruMode)
     {
+    case THRU_TRS_TRS:
+      MIDICoreSerial.send(message);
+      break;
+
+    case THRU_TRS_USB:
       MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
-      n32b_display.blinkDot(2);
+      break;
+    case THRU_BOTH_DIRECTIONS:
+      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
+      MIDICoreSerial.send(message);
     }
+    n32b_display.blinkDot(2);
   }
 }
 
