@@ -72,7 +72,8 @@ enum COMMANDS
   SYNC_KNOBS = 5,            // Send active preset
   CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
   SET_THRU_MODE = 8,         // Set the midi THRU behavior
-  SET_OUTPUT_MODE = 9        // Set the midi OUTPUT behavior
+  SET_OUTPUT_MODE = 9,       // Set the midi OUTPUT behavior
+  END_OF_TRANSMISSION = 99   // Notify end of transmission
 };
 
 enum KNOB_MODES

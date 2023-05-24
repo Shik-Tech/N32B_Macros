@@ -11,6 +11,7 @@ void onUsbMessage(const midi::Message<128> &message)
 {
   if (message.type != midi::MidiType::ActiveSensing)
   {
+    Serial.println(device.activePreset.thruMode);
     switch (device.activePreset.thruMode)
     {
     case THRU_USB_USB:
@@ -154,58 +155,80 @@ void updateKnob(uint8_t index)
 
 void sendCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
 {
-  if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
+  if (device.activePreset.outputMode == OUTPUT_TRS ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
   {
     MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel);
-    MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBvalue, channel);
-
-    MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBvalue, channel);
-    MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBvalue, channel);
+    if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
+    {
+      MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBvalue, channel);
+    }
   }
-  else
+  if (device.activePreset.outputMode == OUTPUT_USB ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
   {
-    MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel);
     MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBvalue, channel);
+    if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
+    {
+      MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBvalue, channel);
+    }
   }
   n32b_display.blinkDot(1);
 }
 
 void sendMacroCCMessage(const struct Knob_t &currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel_a, midi::Channel channel_b)
 {
-  MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel_a);
-  MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBvalue, channel_b);
+  if (device.activePreset.outputMode == OUTPUT_TRS ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreSerial.sendControlChange(currentKnob.MSB, MSBvalue, channel_a);
+    MIDICoreSerial.sendControlChange(currentKnob.LSB, LSBvalue, channel_b);
+  }
 
-  MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBvalue, channel_a);
-  MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBvalue, channel_b);
-
+  if (device.activePreset.outputMode == OUTPUT_USB ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreUSB.sendControlChange(currentKnob.MSB, MSBvalue, channel_a);
+    MIDICoreUSB.sendControlChange(currentKnob.LSB, LSBvalue, channel_b);
+  }
   n32b_display.blinkDot(1);
 }
 
 void sendNRPM(const struct Knob_t &currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
-  MIDICoreSerial.sendControlChange(99, currentKnob.MSB & 0x7F, channel); // NRPN MSB
-  MIDICoreUSB.sendControlChange(99, currentKnob.MSB & 0x7F, channel);    // NRPN MSB
-
-  MIDICoreSerial.sendControlChange(98, currentKnob.LSB & 0x7F, channel); // NRPN LSB
-  MIDICoreUSB.sendControlChange(98, currentKnob.LSB & 0x7F, channel);    // NRPN LSB
-
-  MIDICoreSerial.sendControlChange(6, MSBvalue, channel); // Data Entry MSB
-  MIDICoreUSB.sendControlChange(6, MSBvalue, channel);    // Data Entry MSB
-
+  if (device.activePreset.outputMode == OUTPUT_TRS ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreSerial.sendControlChange(99, currentKnob.MSB & 0x7F, channel); // NRPN MSB
+    MIDICoreSerial.sendControlChange(98, currentKnob.LSB & 0x7F, channel); // NRPN LSB
+    MIDICoreSerial.sendControlChange(6, MSBvalue, channel);                // Data Entry MSB
+  }
+  if (device.activePreset.outputMode == OUTPUT_USB ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreUSB.sendControlChange(99, currentKnob.MSB & 0x7F, channel); // NRPN MSB
+    MIDICoreUSB.sendControlChange(98, currentKnob.LSB & 0x7F, channel); // NRPN LSB
+    MIDICoreUSB.sendControlChange(6, MSBvalue, channel);                // Data Entry MSB
+  }
   n32b_display.blinkDot(1);
 }
 
 void sendRPM(const struct Knob_t &currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
-  MIDICoreSerial.sendControlChange(101, currentKnob.MSB & 0x7F, channel); // RPN MSB
-  MIDICoreUSB.sendControlChange(101, currentKnob.MSB & 0x7F, channel);    // RPN MSB
-
-  MIDICoreSerial.sendControlChange(100, currentKnob.LSB & 0x7F, channel); // RPN LSB
-  MIDICoreUSB.sendControlChange(100, currentKnob.LSB & 0x7F, channel);    // RPN LSB
-
-  MIDICoreSerial.sendControlChange(6, MSBvalue, channel); // Data Entry MSB
-  MIDICoreUSB.sendControlChange(6, MSBvalue, channel);    // Data Entry MSB
-
+  if (device.activePreset.outputMode == OUTPUT_TRS ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreSerial.sendControlChange(101, currentKnob.MSB & 0x7F, channel); // RPN MSB
+    MIDICoreSerial.sendControlChange(100, currentKnob.LSB & 0x7F, channel); // RPN LSB
+    MIDICoreSerial.sendControlChange(6, MSBvalue, channel);                 // Data Entry MSB
+  }
+  if (device.activePreset.outputMode == OUTPUT_USB ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreUSB.sendControlChange(101, currentKnob.MSB & 0x7F, channel); // RPN MSB
+    MIDICoreUSB.sendControlChange(100, currentKnob.LSB & 0x7F, channel); // RPN LSB
+    MIDICoreUSB.sendControlChange(6, MSBvalue, channel);                 // Data Entry MSB
+  }
   n32b_display.blinkDot(1);
 }
 

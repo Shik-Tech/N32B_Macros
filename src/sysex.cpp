@@ -26,6 +26,9 @@ void processSysex(unsigned char *data, unsigned int size)
         case SET_THRU_MODE:
             setMidiThruMode(data[KNOB_INDEX]);
             break;
+        case SET_OUTPUT_MODE:
+            setMidiOutputMode(data[KNOB_INDEX]);
+            break;
         case SAVE_PRESET:
             savePreset(data[KNOB_INDEX]);
             break;
@@ -113,8 +116,18 @@ void sendActivePreset()
         device.activePreset.outputMode};
 
     MIDICoreUSB.sendSysEx(3, presetOutputData);
+
+    uint8_t endOfTransmissionData[2] = {
+        SHIK_MANUFACTURER_ID,
+        END_OF_TRANSMISSION};
+
+    MIDICoreUSB.sendSysEx(3, endOfTransmissionData);
 }
 void setMidiThruMode(byte mode)
 {
     device.activePreset.thruMode = mode;
+}
+void setMidiOutputMode(byte mode)
+{
+    device.activePreset.outputMode = mode;
 }
