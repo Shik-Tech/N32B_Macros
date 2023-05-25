@@ -11,7 +11,6 @@ void onUsbMessage(const midi::Message<128> &message)
 {
   if (message.type != midi::MidiType::ActiveSensing)
   {
-    Serial.println(device.activePreset.thruMode);
     switch (device.activePreset.thruMode)
     {
     case THRU_USB_USB:

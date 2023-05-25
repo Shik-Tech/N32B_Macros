@@ -20,7 +20,7 @@ void processSysex(unsigned char *data, unsigned int size)
             device.activePreset.knobInfo[data[KNOB_INDEX]].MAX_A = data[MAX_A_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].MIN_B = data[MIN_B_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].MAX_B = data[MAX_B_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = data[CHANNELS_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = (data[CHANNEL_A_INDEX] << 4) | data[CHANNEL_B_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].PROPERTIES = data[PROPERTIES_INDEX];
             break;
         case SET_THRU_MODE:
@@ -88,19 +88,22 @@ void sendActivePreset()
     for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
     {
         uint8_t indexId = pgm_read_word_near(knobsLocation + i);
-        uint8_t knobsData[11] = {
+        uint8_t channel_a = device.activePreset.knobInfo[indexId].CHANNELS >> 4;
+        uint8_t channel_b = device.activePreset.knobInfo[indexId].CHANNELS & 0xF;
+        uint8_t knobsData[12] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
             pgm_read_word_near(knobsLocation + i),
             device.activePreset.knobInfo[indexId].MSB,
             device.activePreset.knobInfo[indexId].LSB,
-            device.activePreset.knobInfo[indexId].CHANNELS,
+            channel_a,
+            channel_b,
             device.activePreset.knobInfo[indexId].PROPERTIES,
             device.activePreset.knobInfo[indexId].MIN_A,
             device.activePreset.knobInfo[indexId].MAX_A,
             device.activePreset.knobInfo[indexId].MIN_B,
             device.activePreset.knobInfo[indexId].MAX_B};
-        MIDICoreUSB.sendSysEx(11, knobsData);
+        MIDICoreUSB.sendSysEx(12, knobsData);
     }
 
     uint8_t presetThruData[3] = {
