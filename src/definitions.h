@@ -171,9 +171,6 @@ struct Device_t
 
 /* Device setup data */
 extern Device_t device;
-// extern byte currentPresetNumber;
-// extern Preset_t activePreset;
-// extern uint16_t knobValues[32][4];
 extern float EMA_a; // EMA alpha
 
 /* Buttons variables */
@@ -182,9 +179,6 @@ extern const uint8_t SHORT_PRESS_TIME;   // Milliseconds
 extern unsigned long pressedTime;
 extern bool isPressingAButton;
 extern bool isPressingBButton;
-
-/* Mode variables */
-// extern bool isPresetMode;
 
 // byte index in EEPROM for the last used preset
 extern uint8_t lastUsedPresetAddress;

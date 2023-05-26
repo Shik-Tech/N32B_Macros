@@ -18,11 +18,6 @@ ezButton buttonB(BUTTON_B_PIN);
 
 /* Device setup data */
 Device_t device;
-// byte currentPresetNumber = 0;
-// Preset_t activePreset;
-
-// uint16_t bufferKnobValues[32][3];
-// uint16_t knobValues[32][4] = {0};
 float EMA_a = 0.2;
 
 /* Buttons variables */
@@ -31,9 +26,6 @@ const uint8_t SHORT_PRESS_TIME = 255;    // Milliseconds
 unsigned long pressedTime = 0;
 bool isPressingAButton = false;
 bool isPressingBButton = false;
-
-/* Mode variables */
-// bool isPresetMode = false;
 
 // byte index in EEPROM for the last used preset
 uint8_t lastUsedPresetAddress = 0;
