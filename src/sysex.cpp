@@ -124,7 +124,7 @@ void sendActivePreset()
         SHIK_MANUFACTURER_ID,
         END_OF_TRANSMISSION};
 
-    MIDICoreUSB.sendSysEx(3, endOfTransmissionData);
+    MIDICoreUSB.sendSysEx(2, endOfTransmissionData);
 }
 void setMidiThruMode(byte mode)
 {
