@@ -1,5 +1,5 @@
 /*
-  N32B Macros Firmware v4.0.0
+  N32B Macros Firmware v4.x.x
   MIT License
 
   Copyright (c) 2023 SHIK
@@ -54,33 +54,29 @@ void updateKnob(uint8_t index)
   Knob_t &currentKnob = device.activePreset.knobInfo[index];
   bool needToUpdate = false;
   uint16_t shiftedValue;
+  uint16_t oldShiftedValue;
   uint8_t MSBValue;
+  uint8_t oldMSBValue;
   uint8_t LSBValue;
+  uint8_t oldLSBValue;
+
+  shiftedValue = map(device.knobValues[index][0], 0, 1023, 0, 16383);
+  oldShiftedValue = map(device.knobValues[index][2], 0, 1023, 0, 16383);
+  MSBValue = shiftedValue >> 7;
+  oldMSBValue = oldShiftedValue >> 7;
+  LSBValue = lowByte(shiftedValue) >> 1;
+  oldLSBValue = lowByte(oldShiftedValue) >> 1;
+
   if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
   {
-    if (
-        (device.knobValues[index][0] != device.knobValues[index][1]) &&
-        (device.knobValues[index][0] != device.knobValues[index][2]) &&
-        (device.knobValues[index][0] != device.knobValues[index][3]))
+    if ((device.knobValues[index][0] != device.knobValues[index][2]) && LSBValue != oldLSBValue)
     {
       needToUpdate = true;
-      shiftedValue = map(device.knobValues[index][0], 0, 1019, 0, 16383);
-      MSBValue = shiftedValue >> 7;
-      LSBValue = lowByte(shiftedValue) >> 1;
     }
   }
   else
   {
-    shiftedValue = map(device.knobValues[index][0], 0, 1019, 0, 16383);
-    MSBValue = shiftedValue >> 7;
-
-    uint8_t BufferValue1 = map(device.knobValues[index][1], 0, 1019, 0, 16383) >> 7;
-    uint8_t BufferValue2 = map(device.knobValues[index][2], 0, 1019, 0, 16383) >> 7;
-    uint8_t BufferValue3 = map(device.knobValues[index][3], 0, 1019, 0, 16383) >> 7;
-    if (
-        (MSBValue != BufferValue1) &&
-        (MSBValue != BufferValue2) &&
-        (MSBValue != BufferValue3))
+    if ((device.knobValues[index][0] != device.knobValues[index][2]) && MSBValue != oldMSBValue)
     {
       needToUpdate = true;
     }
@@ -88,6 +84,8 @@ void updateKnob(uint8_t index)
 
   if (needToUpdate)
   {
+    device.knobValues[index][2] = device.knobValues[index][0];
+
     uint8_t mode = extractMode(currentKnob.PROPERTIES);
     midi::Channel channel_a =
         bitRead(currentKnob.PROPERTIES, USE_OWN_CHANNEL_A_PROPERTY)
@@ -145,10 +143,6 @@ void updateKnob(uint8_t index)
     default:
       break;
     }
-
-    device.knobValues[index][3] = device.knobValues[index][2];
-    device.knobValues[index][2] = device.knobValues[index][1];
-    device.knobValues[index][1] = device.knobValues[index][0];
   }
 }
 
