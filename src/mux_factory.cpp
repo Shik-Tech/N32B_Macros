@@ -1,5 +1,5 @@
 /*
-  N32B Macros Firmware v4.0.0
+  N32B Macros Firmware v4.x.x
   MIT License
 
   Copyright (c) 2023 SHIK
@@ -26,22 +26,29 @@ void MUX_FACTORY::setSignalPin(const bool &muxIndex, const uint8_t &pin)
     pinMode(pin, INPUT);
 }
 
-void MUX_FACTORY::update(uint8_t &currentKnob)
+void MUX_FACTORY::update(uint8_t &index)
 {
-    setMultiplexer(currentKnob);
-    device.knobValues[currentKnob][0] = ((EMA_a) * read(currentKnob)) + ((1 - EMA_a) * device.knobValues[currentKnob][0]);
+    setMultiplexer(index);
+    uint16_t currentValue = read(index);
+    int diff = device.knobValues[index][0] != device.knobValues[index][1];
+    int value = (EMA_a)*currentValue + (1 - EMA_a) * device.knobValues[index][1];
+    device.knobValues[index][0] = constrain(map(value, 0, 1020, 0, 1023), 0, 1023);
+    if (diff)
+    {
+        device.knobValues[index][1] = device.knobValues[index][0];
+    }
 }
 
-uint16_t MUX_FACTORY::read(uint8_t &currentKnob)
+uint16_t MUX_FACTORY::read(uint8_t &index)
 {
-    bool pinSelector = currentKnob > 15 ? 1 : 0;
+    bool pinSelector = index > 15 ? 1 : 0;
     return analogRead(signalPin[pinSelector]);
 }
 
-void MUX_FACTORY::setMultiplexer(uint8_t &currentKnob)
+void MUX_FACTORY::setMultiplexer(uint8_t &index)
 {
     for (uint8_t i = 0; i < 4; i++)
     {
-        digitalWrite(channels[i], bitRead(currentKnob, i));
+        digitalWrite(channels[i], bitRead(index, i));
     }
 }

@@ -1,5 +1,5 @@
 /*
-  N32B Macros Firmware v4.0.0
+  N32B Macros Firmware v4.x.x
   MIT License
 
   Copyright (c) 2023 SHIK
@@ -21,7 +21,7 @@
 
 USING_NAMESPACE_MIDI;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 0, 1};
+const uint8_t firmwareVersion[] PROGMEM = {4, 0, 2};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
@@ -163,7 +163,7 @@ struct Preset_t
 struct Device_t
 {
   Preset_t activePreset{0};
-  uint16_t knobValues[32][4]{0};
+  uint16_t knobValues[32][3]{0};
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   bool isPresetMode{false};
