@@ -14,13 +14,14 @@ ADC_MUX::ADC_MUX(
     uint8_t MUX_S1,
     uint8_t MUX_S2,
     uint8_t MUX_S3,
-    std::vector<Pot>(*potsPtr)) : pots(potsPtr),
-                                  mux_a_sig(MUX_A_SIG),
-                                  mux_b_sig(MUX_B_SIG),
-                                  muxS0(MUX_S0),
-                                  muxS1(MUX_S1),
-                                  muxS2(MUX_S2),
-                                  muxS3(MUX_S3) {}
+    Pot *potsPtr)
+    : mux_a_sig(MUX_A_SIG),
+      mux_b_sig(MUX_B_SIG),
+      muxS0(MUX_S0),
+      muxS1(MUX_S1),
+      muxS2(MUX_S2),
+      muxS3(MUX_S3),
+      pots(potsPtr) {}
 
 void ADC_MUX::init()
 {
@@ -38,66 +39,70 @@ void ADC_MUX::update(const uint8_t &index)
     setMultiplexer(index);
     delayMicroseconds(10);
     const uint16_t sensorRead = read(index);
-    Pot &pot = (*pots)[index];
+    Pot &pot = pots[index];
 
-    uint16_t filteredValue = constrain(map(sensorRead, 0, 1023, 0, 1023), 0, 1023);
+    // uint16_t filteredValue = constrain(map(sensorRead, 0, 1023, 0, 1023), 0, 1023);
+    uint16_t filteredValue = constrain(sensorRead, 0, 1023);
 
     pot.current_value = filteredValue;
 
     int value_difference = abs(pot.current_value - pot.previous_value);
-
+    if (index == 0)
+    {
+        Serial.println(pot.current_value);
+    }
     if (pot.state == Pot::IDLE)
     {
         if (value_difference > threshold_idle_to_motion)
         {
             pot.state = Pot::IN_MOTION;
 
-            if (index == 0)
-            {
-                SerialUSB.print("previous_value: ");
-                SerialUSB.println(pot.previous_value);
+            // if (index == 0)
+            // {
+            //     SerialUSB.print("previous_value: ");
+            //     SerialUSB.println(pot.previous_value);
 
-                SerialUSB.print("sensorRead: ");
-                SerialUSB.println(sensorRead);
+            //     SerialUSB.print("sensorRead: ");
+            //     SerialUSB.println(sensorRead);
 
-                SerialUSB.print("current_value: ");
-                SerialUSB.println(pot.current_value);
+            //     SerialUSB.print("current_value: ");
+            //     SerialUSB.println(pot.current_value);
 
-                SerialUSB.print("value_difference: ");
-                SerialUSB.println(value_difference);
+            //     SerialUSB.print("value_difference: ");
+            //     SerialUSB.println(value_difference);
 
-                SerialUSB.print("release_counter: ");
-                SerialUSB.println(pot.release_counter);
+            //     SerialUSB.print("release_counter: ");
+            //     SerialUSB.println(pot.release_counter);
 
-                SerialUSB.println("SET IN_MOTION");
-                SerialUSB.println("------------");
-            }
+            //     SerialUSB.println("SET IN_MOTION");
+            //     SerialUSB.println("------------");
+            // }
             pot.previous_value = pot.current_value;
         }
     }
     else if (pot.state == Pot::IN_MOTION)
     {
-        if (index == 0)
-        {
-            SerialUSB.println("IN_MOTION");
+        // if (index == 0)
+        // {
+        //     SerialUSB.println("IN_MOTION");
 
-            SerialUSB.print("previous_value: ");
-            SerialUSB.println(pot.previous_value);
+        //     SerialUSB.print("previous_value: ");
+        //     SerialUSB.println(pot.previous_value);
 
-            SerialUSB.print("sensorRead: ");
-            SerialUSB.println(sensorRead);
+        //     SerialUSB.print("sensorRead: ");
+        //     SerialUSB.println(sensorRead);
 
-            SerialUSB.print("current_value: ");
-            SerialUSB.println(pot.current_value);
+        //     SerialUSB.print("current_value: ");
+        //     SerialUSB.println(pot.current_value);
 
-            SerialUSB.print("value_difference: ");
-            SerialUSB.println(value_difference);
+        //     SerialUSB.print("value_difference: ");
+        //     SerialUSB.println(value_difference);
 
-            SerialUSB.print("release_counter: ");
-            SerialUSB.println(pot.release_counter);
+        //     SerialUSB.print("release_counter: ");
+        //     SerialUSB.println(pot.release_counter);
 
-            SerialUSB.println("------------");
-        }
+        //     SerialUSB.println("------------");
+        // }
 
         if (value_difference < threshold_motion_to_idle)
         {
@@ -106,26 +111,26 @@ void ADC_MUX::update(const uint8_t &index)
             {
                 pot.state = Pot::IDLE;
 
-                // if (index == 0)
-                // {
-                //     SerialUSB.print("previous_value: ");
-                //     SerialUSB.println(pot.previous_value);
+                if (index == 0)
+                {
+                    SerialUSB.print("previous_value: ");
+                    SerialUSB.println(pot.previous_value);
 
-                //     SerialUSB.print("sensorRead: ");
-                //     SerialUSB.println(sensorRead);
+                    SerialUSB.print("sensorRead: ");
+                    SerialUSB.println(sensorRead);
 
-                //     SerialUSB.print("current_value: ");
-                //     SerialUSB.println(pot.current_value);
+                    SerialUSB.print("current_value: ");
+                    SerialUSB.println(pot.current_value);
 
-                //     SerialUSB.print("value_difference: ");
-                //     SerialUSB.println(value_difference);
+                    SerialUSB.print("value_difference: ");
+                    SerialUSB.println(value_difference);
 
-                //     SerialUSB.print("release_counter: ");
-                //     SerialUSB.println(pot.release_counter);
+                    SerialUSB.print("release_counter: ");
+                    SerialUSB.println(pot.release_counter);
 
-                //     SerialUSB.println("IDLE");
-                //     SerialUSB.println("------------");
-                // }
+                    SerialUSB.println("IDLE");
+                    SerialUSB.println("------------");
+                }
                 pot.release_counter = 0;
             }
         }

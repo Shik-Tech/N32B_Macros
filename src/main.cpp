@@ -81,17 +81,7 @@ void setup()
     formatFactory();
   }
 
-  delay(3000);
-  Serial.println("Start");
-  // for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
-  // {
-    pots.push_back(Pot());
-  // }
-  Serial.println("Added pots");
-
   muxFactory.init();
-
-  Serial.println("Init mux");
 
   // Load the last used preset as stored in EEPROM
   loadPreset(EEPROM.read(lastUsedPresetAddress));
@@ -111,8 +101,8 @@ void setup()
   MIDICoreSerial.begin(MIDI_CHANNEL_OMNI);
 
   // Send an Active Sensing MIDI message to notify the target that the controller is on the bus
-  MIDICoreUSB.sendRealTime((midi::MidiType)0xFE);
-  MIDICoreSerial.sendRealTime((midi::MidiType)0xFE);
+  // MIDICoreUSB.sendRealTime((midi::MidiType)0xFE);
+  // MIDICoreSerial.sendRealTime((midi::MidiType)0xFE);
 
   n32b_display.showStartUpAnimation();
 }

@@ -12,9 +12,9 @@ struct Pot
     } state;
     uint8_t MSBValue;
     uint8_t LSBValue;
-    int current_value;
-    int previous_value;
-    int release_counter;
+    uint16_t current_value;
+    uint16_t previous_value;
+    uint8_t release_counter;
 
     Pot() : state(IDLE),
             MSBValue(0),

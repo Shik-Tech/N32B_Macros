@@ -34,7 +34,6 @@ extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
 extern ADC_MUX muxFactory;
 extern N32B_DISPLAY n32b_display;
-extern std::vector<Pot> pots;
 extern ezButton buttonA;
 extern ezButton buttonB;
 
@@ -171,7 +170,7 @@ struct Preset_t
 struct Device_t
 {
   Preset_t activePreset{0};
-  // uint16_t knobValues[32][3]{0};
+  Pot pots[NUMBER_OF_KNOBS];
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   bool isPresetMode{false};
@@ -179,7 +178,7 @@ struct Device_t
 
 /* Device setup data */
 extern Device_t device;
-extern float EMA_a; // EMA alpha
+// extern float EMA_a; // EMA alpha
 
 /* Buttons variables */
 extern const unsigned int reset_timeout; // Reset to factory preset timeout
