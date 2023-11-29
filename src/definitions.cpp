@@ -10,7 +10,8 @@
 USBMIDI_CREATE_INSTANCE(0, MIDICoreUSB);
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDICoreSerial);
 
-MUX_FACTORY muxFactory;
+std::vector<Pot> pots;
+ADC_MUX muxFactory(MUX_A_SIG, MUX_B_SIG, MUX_S0, MUX_S1, MUX_S2, MUX_S3, &pots);
 N32B_DISPLAY n32b_display(DIN, CS, CLK);
 
 ezButton buttonA(BUTTON_A_PIN);

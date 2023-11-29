@@ -19,12 +19,16 @@ USING_NAMESPACE_MIDI;
 void onUsbMessage(const midi::Message<128> &);
 void onSerialMessage(const midi::Message<128> &);
 
-void updateKnob(uint8_t);
+// void updateKnob(uint8_t);
+void updateKnob(const uint8_t &index);
+void calculateMSBValue(const struct Knob_t *currentKnob, uint8_t &MSBValue);
+void calculateLSBValue(const struct Knob_t *currentKnob, uint8_t &LSBValue);
+void sendMacroCCMessage(const uint8_t &index, const uint16_t &value_14bit);
 
-void sendCCMessage(const struct Knob_t &, uint8_t, uint8_t, midi::Channel);
-void sendMacroCCMessage(const struct Knob_t &, uint8_t, uint8_t, midi::Channel, midi::Channel);
-void sendRPM(const struct Knob_t &, uint8_t, midi::Channel);
-void sendNRPM(const struct Knob_t &, uint8_t, midi::Channel);
+void sendCCMessage(const struct Knob_t *, uint8_t, uint8_t, midi::Channel);
+// void sendMacroCCMessage(const struct Knob_t &, uint8_t, uint8_t, midi::Channel, midi::Channel);
+void sendRPM(const struct Knob_t *, uint8_t, midi::Channel);
+void sendNRPM(const struct Knob_t *, uint8_t, midi::Channel);
 
 void changeChannel(bool);
 void changePreset(bool);

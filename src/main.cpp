@@ -16,9 +16,8 @@ void setup()
   n32b_display.setBright(0);
   n32b_display.setDigitLimit(2);
 
-  muxFactory.init(MUX_S0, MUX_S1, MUX_S2, MUX_S3);
-  muxFactory.setSignalPin(0, MUX_A_SIG);
-  muxFactory.setSignalPin(1, MUX_B_SIG);
+  // muxFactory.setSignalPin(0, MUX_A_SIG);
+  // muxFactory.setSignalPin(1, MUX_B_SIG);
 
   /* Pin setup */
   pinMode(MIDI_TX_PIN, OUTPUT);
@@ -26,17 +25,17 @@ void setup()
   pinMode(LED_PIN, OUTPUT);
   pinMode(BUTTON_A_PIN, INPUT_PULLUP);
   pinMode(BUTTON_B_PIN, INPUT_PULLUP);
-  pinMode(MUX_A_SIG, INPUT);
-  pinMode(MUX_B_SIG, INPUT);
+  // pinMode(MUX_A_SIG, INPUT);
+  // pinMode(MUX_B_SIG, INPUT);
 
   // Set debounce time to 50 milliseconds
   buttonA.setDebounceTime(50);
   buttonB.setDebounceTime(50);
 
   /*
-  * Factory Reset
-  * Hold button-A down while powering the device will reset the presets
-  */
+   * Factory Reset
+   * Hold button-A down while powering the device will reset the presets
+   */
   if (!digitalRead(BUTTON_A_PIN))
   {
     bool buttonPressed = true;
@@ -81,6 +80,18 @@ void setup()
     n32b_display.factoryResetAnimation();
     formatFactory();
   }
+
+  delay(3000);
+  Serial.println("Start");
+  // for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
+  // {
+    pots.push_back(Pot());
+  // }
+  Serial.println("Added pots");
+
+  muxFactory.init();
+
+  Serial.println("Init mux");
 
   // Load the last used preset as stored in EEPROM
   loadPreset(EEPROM.read(lastUsedPresetAddress));

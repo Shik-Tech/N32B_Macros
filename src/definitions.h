@@ -13,20 +13,28 @@
 #define N32B_DEFINITIONS
 
 #include <Arduino.h>
+#include <vector>
+
 #include <USB-MIDI.h>
 #include <ezButton.h>
 
-#include "mux_factory.h"
+#include <Pot.h>
+#include "adcMux.h"
 #include "display.h"
 
 USING_NAMESPACE_MIDI;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 0, 2};
+
+constexpr uint8_t threshold_idle_to_motion = 2;
+constexpr uint8_t threshold_motion_to_idle = 16;
+
+const uint8_t firmwareVersion[] PROGMEM = {4, 1, 0};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
-extern MUX_FACTORY muxFactory;
+extern ADC_MUX muxFactory;
 extern N32B_DISPLAY n32b_display;
+extern std::vector<Pot> pots;
 extern ezButton buttonA;
 extern ezButton buttonB;
 
@@ -163,7 +171,7 @@ struct Preset_t
 struct Device_t
 {
   Preset_t activePreset{0};
-  uint16_t knobValues[32][3]{0};
+  // uint16_t knobValues[32][3]{0};
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   bool isPresetMode{false};
