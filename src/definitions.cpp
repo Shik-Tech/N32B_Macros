@@ -18,7 +18,6 @@ ezButton buttonB(BUTTON_B_PIN);
 
 /* Device setup data */
 Device_t device;
-// float EMA_a = 0.3;
 
 /* Buttons variables */
 const unsigned int reset_timeout = 4000; // Reset to factory preset timeout

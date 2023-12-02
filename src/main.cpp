@@ -16,9 +16,6 @@ void setup()
   n32b_display.setBright(0);
   n32b_display.setDigitLimit(2);
 
-  // muxFactory.setSignalPin(0, MUX_A_SIG);
-  // muxFactory.setSignalPin(1, MUX_B_SIG);
-
   /* Pin setup */
   pinMode(MIDI_TX_PIN, OUTPUT);
   digitalWrite(MIDI_TX_PIN, HIGH); // Prevent random messages on startup
