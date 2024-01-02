@@ -9,7 +9,7 @@
 
 void onUsbMessage(const midi::Message<128> &message)
 {
-  if (message.type != midi::MidiType::ActiveSensing)
+  if (message.type != ActiveSensing)
   {
     switch (device.activePreset.thruMode)
     {
@@ -20,9 +20,11 @@ void onUsbMessage(const midi::Message<128> &message)
     case THRU_USB_TRS:
       MIDICoreSerial.send(message);
       break;
+
     case THRU_BOTH_DIRECTIONS:
       MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
       MIDICoreSerial.send(message);
+      break;
     }
     n32b_display.blinkDot(2);
   }
@@ -30,7 +32,7 @@ void onUsbMessage(const midi::Message<128> &message)
 
 void onSerialMessage(const midi::Message<128> &message)
 {
-  if (message.type != midi::MidiType::ActiveSensing)
+  if (message.type != ActiveSensing)
   {
     switch (device.activePreset.thruMode)
     {
@@ -41,9 +43,11 @@ void onSerialMessage(const midi::Message<128> &message)
     case THRU_TRS_USB:
       MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
       break;
+
     case THRU_BOTH_DIRECTIONS:
       MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
       MIDICoreSerial.send(message);
+      break;
     }
     n32b_display.blinkDot(2);
   }
@@ -52,17 +56,16 @@ void onSerialMessage(const midi::Message<128> &message)
 void updateKnob(const uint8_t &index)
 {
   Pot *pot = &device.pots[index];
-  if (pot->state == Pot::IN_MOTION)
+
+  if (pot->getState() == Pot_t::IN_MOTION)
   {
     Knob_t *currentKnob = &device.activePreset.knobInfo[index];
     Pot *pot = &device.pots[index];
 
-    const uint16_t value_14bit = (uint16_t)(pot->current_value) << 4;
-    // const uint16_t prev_value_14bit = (uint16_t)(pot->previous_value) << 4;
-    uint8_t oldMSBValue = pot->MSBValue;
-    uint8_t oldLSBValue = pot->LSBValue;
-    pot->MSBValue = 0x7f & (value_14bit >> 7);
-    pot->LSBValue = 0x7f & value_14bit;
+    uint8_t oldMSBValue = pot->getMSBValue();
+    uint8_t oldLSBValue = pot->getLSBValue();
+    pot->setMSBValue();
+    pot->setLSBValue();
     uint8_t mode = extractMode(currentKnob->PROPERTIES);
 
     midi::Channel channel_a =
@@ -75,75 +78,76 @@ void updateKnob(const uint8_t &index)
             ? extractChannel(currentKnob->CHANNELS, CHANNEL_B)
             : device.globalChannel;
 
-    uint8_t MSBSendValue = map(pot->MSBValue, 0, 127, currentKnob->MIN_A, currentKnob->MAX_A);
+    uint8_t MSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MIN_A, currentKnob->MAX_A);
     if (bitRead(currentKnob->PROPERTIES, INVERT_A_PROPERTY))
     {
-      MSBSendValue = map(pot->MSBValue, 0, 127, currentKnob->MAX_A, currentKnob->MIN_A);
+      MSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MAX_A, currentKnob->MIN_A);
     }
 
     uint8_t LSBSendValue;
     if (extractMode(currentKnob->PROPERTIES) == KNOB_MODE_HIRES)
     {
-      LSBSendValue = pot->LSBValue;
+      LSBSendValue = pot->getLSBValue();
       if (bitRead(currentKnob->PROPERTIES, INVERT_A_PROPERTY))
       {
-        LSBSendValue = 127 - pot->LSBValue;
+        LSBSendValue = 127 - pot->getLSBValue();
       }
     }
     else
     {
-      LSBSendValue = map(pot->MSBValue, 0, 127, currentKnob->MIN_B, currentKnob->MAX_B);
+      LSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MIN_B, currentKnob->MAX_B);
       if (bitRead(currentKnob->PROPERTIES, INVERT_B_PROPERTY))
       {
-        LSBSendValue = map(pot->MSBValue, 0, 127, currentKnob->MAX_B, currentKnob->MIN_B);
+        LSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MAX_B, currentKnob->MIN_B);
       }
     }
+
     switch (mode)
     {
     case KNOB_MODE_STANDARD:
-      if (oldMSBValue != pot->MSBValue)
+      if (oldMSBValue != pot->getMSBValue())
       {
         sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_HIRES:
-      if (oldLSBValue != pot->LSBValue)
+      if (oldLSBValue != pot->getLSBValue())
       {
         sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_MACRO:
-      if (oldMSBValue != pot->MSBValue)
+      if (oldMSBValue != pot->getMSBValue())
       {
         sendMacroCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
       }
       break;
 
     case KNOB_MODE_NRPN:
-      if (oldLSBValue != pot->LSBValue)
+      if (oldLSBValue != pot->getLSBValue())
       {
         sendNRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_RPN:
-      if (oldLSBValue != pot->LSBValue)
+      if (oldLSBValue != pot->getLSBValue())
       {
         sendRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_PROGRAM_CHANGE:
-      if (oldMSBValue != pot->MSBValue)
+      if (oldMSBValue != pot->getMSBValue())
       {
         sendProgramChange(MSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_AFTER_TOUCH:
-      if (oldLSBValue != pot->LSBValue)
+      if (oldLSBValue != pot->getLSBValue())
       {
         sendAfterTouch(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }

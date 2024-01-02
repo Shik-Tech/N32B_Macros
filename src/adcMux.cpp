@@ -30,32 +30,32 @@ void ADC_MUX::update(const uint8_t &index)
     // uint16_t filteredValue = constrain(map(sensorRead, 0, 1023, 0, 1023), 0, 1023);
     uint16_t filteredValue = constrain(sensorRead, 0, 1023);
 
-    pot.current_value = filteredValue;
+    pot.setCurrentValue(filteredValue);
 
-    int value_difference = abs((int)(pot.current_value - pot.previous_value));
-    if (pot.state == Pot::IDLE)
+    uint16_t value_difference = abs(pot.getCurrentValue() - pot.getPreviousValue());
+    if (pot.getState() == Pot_t::IDLE)
     {
         if (value_difference > threshold_idle_to_motion)
         {
-            pot.state = Pot::IN_MOTION;
-            pot.previous_value = pot.current_value;
+            pot.setState(Pot_t::IN_MOTION);
+            pot.setPreviousValue();
         }
     }
-    else if (pot.state == Pot::IN_MOTION)
+    else if (pot.getState() == Pot_t::IN_MOTION)
     {
         if (value_difference < threshold_motion_to_idle)
         {
-            pot.release_counter++;
-            if (pot.release_counter > 3)
+            pot.increaseReleaseCounter();
+            if (pot.getReleaseCounter() > 3)
             {
-                pot.state = Pot::IDLE;
-                pot.release_counter = 0;
+                pot.setState(Pot_t::IDLE);
+                pot.resetReleaseCounter();
             }
         }
         else
         {
-            pot.release_counter = 0;
-            pot.previous_value = pot.current_value;
+            pot.resetReleaseCounter();
+            pot.setPreviousValue();
         }
     }
 }
