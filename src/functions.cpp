@@ -58,7 +58,7 @@ void updateKnob(const uint8_t &index)
     Pot *pot = &device.pots[index];
 
     const uint16_t value_14bit = (uint16_t)(pot->current_value) << 4;
-    const uint16_t prev_value_14bit = (uint16_t)(pot->previous_value) << 4;
+    // const uint16_t prev_value_14bit = (uint16_t)(pot->previous_value) << 4;
     uint8_t oldMSBValue = pot->MSBValue;
     uint8_t oldLSBValue = pot->LSBValue;
     pot->MSBValue = 0x7f & (value_14bit >> 7);
@@ -98,7 +98,6 @@ void updateKnob(const uint8_t &index)
         LSBSendValue = map(pot->MSBValue, 0, 127, currentKnob->MAX_B, currentKnob->MIN_B);
       }
     }
-
     switch (mode)
     {
     case KNOB_MODE_STANDARD:
@@ -120,6 +119,7 @@ void updateKnob(const uint8_t &index)
       {
         sendMacroCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
       }
+      break;
 
     case KNOB_MODE_NRPN:
       if (oldLSBValue != pot->LSBValue)
@@ -135,21 +135,19 @@ void updateKnob(const uint8_t &index)
       }
       break;
 
-      // case KNOB_MODE_PROGRAM_CHANGE:
-      //   if (oldMSBValue != MSBValue)
-      //   {
-      //     interface.sendProgramChange(MSBValue, channel);
-      //     isMidiChanged = true;
-      //   }
-      //   break;
+    case KNOB_MODE_PROGRAM_CHANGE:
+      if (oldMSBValue != pot->MSBValue)
+      {
+        sendProgramChange(MSBSendValue, channel_a);
+      }
+      break;
 
-      // case KNOB_MODE_AFTER_TOUCH:
-      //   if (oldMSBValue != MSBValue)
-      //   {
-      //     interface.sendAfterTouch(MSBValue, channel);
-      //     isMidiChanged = true;
-      //   }
-      //   break;
+    case KNOB_MODE_AFTER_TOUCH:
+      if (oldLSBValue != pot->LSBValue)
+      {
+        sendAfterTouch(currentKnob, MSBSendValue, LSBSendValue, channel_a);
+      }
+      break;
 
       //    case KNOB_SYSEX:
       //        if (oldLSBValue != LSBValue)
@@ -307,10 +305,6 @@ void sendNRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBval
     MIDICoreSerial.beginNrpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
     MIDICoreSerial.sendNrpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreSerial.endNrpn(channel);
-
-    // MIDICoreSerial.sendControlChange(99, currentKnob->MSB & 0x7F, channel); // NRPN MSB
-    // MIDICoreSerial.sendControlChange(98, currentKnob->LSB & 0x7F, channel); // NRPN LSB
-    // MIDICoreSerial.sendControlChange(6, MSBvalue, channel);                 // Data Entry MSB
   }
   if (device.activePreset.outputMode == OUTPUT_USB ||
       device.activePreset.outputMode == OUTPUT_BOTH)
@@ -319,10 +313,6 @@ void sendNRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBval
     MIDICoreUSB.beginNrpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
     MIDICoreUSB.sendNrpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreUSB.endNrpn(channel);
-
-    // MIDICoreUSB.sendControlChange(99, currentKnob->MSB & 0x7F, channel); // NRPN MSB
-    // MIDICoreUSB.sendControlChange(98, currentKnob->LSB & 0x7F, channel); // NRPN LSB
-    // MIDICoreUSB.sendControlChange(6, MSBvalue, channel);                 // Data Entry MSB
   }
   n32b_display.blinkDot(1);
 }
@@ -335,10 +325,6 @@ void sendRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalu
     MIDICoreSerial.beginRpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
     MIDICoreSerial.sendRpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreSerial.endRpn(channel);
-
-    // MIDICoreSerial.sendControlChange(101, currentKnob->MSB & 0x7F, channel); // RPN MSB
-    // MIDICoreSerial.sendControlChange(100, currentKnob->LSB & 0x7F, channel); // RPN LSB
-    // MIDICoreSerial.sendControlChange(6, MSBvalue, channel);                  // Data Entry MSB
   }
   if (device.activePreset.outputMode == OUTPUT_USB ||
       device.activePreset.outputMode == OUTPUT_BOTH)
@@ -346,10 +332,36 @@ void sendRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalu
     MIDICoreUSB.beginRpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
     MIDICoreUSB.sendRpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreUSB.endRpn(channel);
+  }
+  n32b_display.blinkDot(1);
+}
 
-    // MIDICoreUSB.sendControlChange(101, currentKnob->MSB & 0x7F, channel); // RPN MSB
-    // MIDICoreUSB.sendControlChange(100, currentKnob->LSB & 0x7F, channel); // RPN LSB
-    // MIDICoreUSB.sendControlChange(6, MSBvalue, channel);                  // Data Entry MSB
+void sendProgramChange(uint8_t MSBvalue, midi::Channel channel)
+{
+  if (device.activePreset.outputMode == OUTPUT_TRS ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreSerial.sendProgramChange(MSBvalue, channel);
+  }
+  if (device.activePreset.outputMode == OUTPUT_USB ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreUSB.sendProgramChange(MSBvalue, channel);
+  }
+  n32b_display.blinkDot(1);
+}
+
+void sendAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
+{
+  if (device.activePreset.outputMode == OUTPUT_TRS ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreSerial.sendAfterTouch(currentKnob->MSB, MSBvalue, channel);
+  }
+  if (device.activePreset.outputMode == OUTPUT_USB ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreUSB.sendAfterTouch(currentKnob->MSB, MSBvalue, channel);
   }
   n32b_display.blinkDot(1);
 }

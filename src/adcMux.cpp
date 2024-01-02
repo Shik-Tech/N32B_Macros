@@ -7,21 +7,7 @@
 
 #include "adcMux.h"
 
-ADC_MUX::ADC_MUX(
-    uint8_t MUX_A_SIG,
-    uint8_t MUX_B_SIG,
-    uint8_t MUX_S0,
-    uint8_t MUX_S1,
-    uint8_t MUX_S2,
-    uint8_t MUX_S3,
-    Pot *potsPtr)
-    : mux_a_sig(MUX_A_SIG),
-      mux_b_sig(MUX_B_SIG),
-      muxS0(MUX_S0),
-      muxS1(MUX_S1),
-      muxS2(MUX_S2),
-      muxS3(MUX_S3),
-      pots(potsPtr) {}
+ADC_MUX::ADC_MUX(Pot *potsPtr) : pots(potsPtr) {}
 
 void ADC_MUX::init()
 {
@@ -30,8 +16,8 @@ void ADC_MUX::init()
         pinMode(channels[i], OUTPUT);
     }
 
-    pinMode(mux_a_sig, INPUT);
-    pinMode(mux_b_sig, INPUT);
+    pinMode(MUX_A_SIG, INPUT);
+    pinMode(MUX_B_SIG, INPUT);
 }
 
 void ADC_MUX::update(const uint8_t &index)

@@ -19,26 +19,24 @@
 #include <ezButton.h>
 
 #include <Pot.h>
-#include "adcMux.h"
+
 #include "display.h"
 
 USING_NAMESPACE_MIDI;
 
-
 constexpr uint8_t threshold_idle_to_motion = 2;
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 1, 0};
+const uint8_t firmwareVersion[] PROGMEM = {4, 1, 1};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
-extern ADC_MUX muxFactory;
 extern N32B_DISPLAY n32b_display;
 extern ezButton buttonA;
 extern ezButton buttonB;
 
 /* Pin setup */
-enum PINS
+enum PinIndices
 {
   MUX_A_SIG = 8,
   MUX_B_SIG = 9,
@@ -91,7 +89,9 @@ enum KNOB_MODES
   KNOB_MODE_MACRO = 2,
   KNOB_MODE_NRPN = 3,
   KNOB_MODE_RPN = 4,
-  KNOB_MODE_HIRES = 5
+  KNOB_MODE_HIRES = 5,
+  KNOB_MODE_PROGRAM_CHANGE = 6,
+  KNOB_MODE_AFTER_TOUCH = 7 
 };
 
 // General definitions

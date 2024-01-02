@@ -10,6 +10,9 @@
 #include "definitions.h"
 #include "functions.h"
 #include "sysex.h"
+#include "adcMux.h"
+
+ADC_MUX muxFactory(device.pots);
 
 void setup()
 {
