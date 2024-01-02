@@ -85,13 +85,13 @@ void updateKnob(const uint8_t &index)
     }
 
     uint8_t LSBSendValue;
+
     if (extractMode(currentKnob->PROPERTIES) == KNOB_MODE_HIRES)
     {
       LSBSendValue = pot->getLSBValue();
-      if (bitRead(currentKnob->PROPERTIES, INVERT_A_PROPERTY))
-      {
-        LSBSendValue = 127 - pot->getLSBValue();
-      }
+
+      uint8_t mappedValue = (LSBSendValue < 16) ? 0 : ((LSBSendValue == 16) ? 16 : (LSBSendValue | 0xF));
+      LSBSendValue = bitRead(currentKnob->PROPERTIES, INVERT_A_PROPERTY) ? 127 - mappedValue : mappedValue;
     }
     else
     {
