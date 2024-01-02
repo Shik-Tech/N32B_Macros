@@ -159,103 +159,6 @@ void updateKnob(const uint8_t &index)
   }
 }
 
-// void updateKnob(uint8_t index)
-// {
-//   Knob_t &currentKnob = device.activePreset.knobInfo[index];
-//   bool needToUpdate = false;
-//   uint16_t shiftedValue;
-//   uint16_t oldShiftedValue;
-//   uint8_t MSBValue;
-//   uint8_t oldMSBValue;
-//   uint8_t LSBValue;
-//   uint8_t oldLSBValue;
-
-//   shiftedValue = map(device.knobValues[index][0], 0, 1023, 0, 16383);
-//   oldShiftedValue = map(device.knobValues[index][2], 0, 1023, 0, 16383);
-//   MSBValue = shiftedValue >> 7;
-//   oldMSBValue = oldShiftedValue >> 7;
-//   LSBValue = lowByte(shiftedValue) >> 1;
-//   oldLSBValue = lowByte(oldShiftedValue) >> 1;
-
-//   if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
-//   {
-//     if ((device.knobValues[index][0] != device.knobValues[index][2]) && LSBValue != oldLSBValue)
-//     {
-//       needToUpdate = true;
-//     }
-//   }
-//   else
-//   {
-//     if ((device.knobValues[index][0] != device.knobValues[index][2]) && MSBValue != oldMSBValue)
-//     {
-//       needToUpdate = true;
-//     }
-//   }
-
-//   if (needToUpdate)
-//   {
-//     device.knobValues[index][2] = device.knobValues[index][0];
-
-//     uint8_t mode = extractMode(currentKnob.PROPERTIES);
-//     midi::Channel channel_a =
-//         bitRead(currentKnob.PROPERTIES, USE_OWN_CHANNEL_A_PROPERTY)
-//             ? extractChannel(currentKnob.CHANNELS, CHANNEL_A)
-//             : device.globalChannel;
-
-//     midi::Channel channel_b =
-//         bitRead(currentKnob.PROPERTIES, USE_OWN_CHANNEL_B_PROPERTY)
-//             ? extractChannel(currentKnob.CHANNELS, CHANNEL_B)
-//             : device.globalChannel;
-
-//     uint8_t MSBSendValue = map(MSBValue, 0, 127, currentKnob.MIN_A, currentKnob.MAX_A);
-//     if (bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY))
-//     {
-//       MSBSendValue = map(MSBValue, 0, 127, currentKnob.MAX_A, currentKnob.MIN_A);
-//     }
-
-//     uint8_t LSBSendValue;
-//     if (extractMode(currentKnob.PROPERTIES) == KNOB_MODE_HIRES)
-//     {
-//       LSBSendValue = LSBValue;
-//       if (bitRead(currentKnob.PROPERTIES, INVERT_A_PROPERTY))
-//       {
-//         LSBSendValue = 127 - LSBValue;
-//       }
-//     }
-//     else
-//     {
-//       LSBSendValue = map(MSBValue, 0, 127, currentKnob.MIN_B, currentKnob.MAX_B);
-//       if (bitRead(currentKnob.PROPERTIES, INVERT_B_PROPERTY))
-//       {
-//         LSBSendValue = map(MSBValue, 0, 127, currentKnob.MAX_B, currentKnob.MIN_B);
-//       }
-//     }
-
-//     switch (mode)
-//     {
-//     case KNOB_MODE_STANDARD:
-//     case KNOB_MODE_HIRES:
-//       sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
-//       break;
-
-//     case KNOB_MODE_MACRO:
-//       sendMacroCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
-//       break;
-
-//     case KNOB_MODE_NRPN:
-//       sendNRPM(currentKnob, MSBSendValue, channel_a);
-//       break;
-
-//     case KNOB_MODE_RPN:
-//       sendRPM(currentKnob, MSBSendValue, channel_a);
-//       break;
-
-//     default:
-//       break;
-//     }
-//   }
-// }
-
 void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
 {
   if (device.activePreset.outputMode == OUTPUT_TRS ||
@@ -404,8 +307,6 @@ void changePreset(const bool &direction)
     else
       loadPreset(NUMBER_OF_PRESETS - 1);
   }
-  // MIDICoreSerial.sendProgramChange(device.currentPresetIndex, 1);
-  // MIDICoreUSB.sendProgramChange(device.currentPresetIndex, 1);
 }
 
 void buttonReleaseAction(const bool &direction)

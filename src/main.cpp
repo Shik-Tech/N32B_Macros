@@ -25,8 +25,6 @@ void setup()
   pinMode(LED_PIN, OUTPUT);
   pinMode(BUTTON_A_PIN, INPUT_PULLUP);
   pinMode(BUTTON_B_PIN, INPUT_PULLUP);
-  // pinMode(MUX_A_SIG, INPUT);
-  // pinMode(MUX_B_SIG, INPUT);
 
   // Set debounce time to 50 milliseconds
   buttonA.setDebounceTime(50);
@@ -99,10 +97,6 @@ void setup()
   /* Initiate MIDI communications, listen to all channels */
   MIDICoreUSB.begin(MIDI_CHANNEL_OMNI);
   MIDICoreSerial.begin(MIDI_CHANNEL_OMNI);
-
-  // Send an Active Sensing MIDI message to notify the target that the controller is on the bus
-  // MIDICoreUSB.sendRealTime((midi::MidiType)0xFE);
-  // MIDICoreSerial.sendRealTime((midi::MidiType)0xFE);
 
   n32b_display.showStartUpAnimation();
 }
