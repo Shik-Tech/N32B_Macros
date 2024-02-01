@@ -146,10 +146,16 @@ void updateKnob(const uint8_t &index)
       }
       break;
 
-    case KNOB_MODE_AFTER_TOUCH:
-      if (oldLSBValue != pot->getLSBValue())
+    case KNOB_MODE_POLY_AFTER_TOUCH:
+      if (oldMSBValue != pot->getMSBValue())
       {
-        sendAfterTouch(currentKnob, MSBSendValue, LSBSendValue, channel_a);
+        sendPolyAfterTouch(currentKnob, MSBSendValue, channel_a);
+      }
+      break;
+    case KNOB_MODE_MONO_AFTER_TOUCH:
+      if (oldMSBValue != pot->getMSBValue())
+      {
+        sendMonoAfterTouch(MSBSendValue, channel_a);
       }
       break;
 
@@ -258,7 +264,7 @@ void sendProgramChange(uint8_t MSBvalue, midi::Channel channel)
   n32b_display.blinkDot(1);
 }
 
-void sendAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
+void sendPolyAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
   if (device.activePreset.outputMode == OUTPUT_TRS ||
       device.activePreset.outputMode == OUTPUT_BOTH)
@@ -269,6 +275,21 @@ void sendAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t 
       device.activePreset.outputMode == OUTPUT_BOTH)
   {
     MIDICoreUSB.sendAfterTouch(currentKnob->MSB, MSBvalue, channel);
+  }
+  n32b_display.blinkDot(1);
+}
+
+void sendMonoAfterTouch(uint8_t MSBvalue, midi::Channel channel)
+{
+  if (device.activePreset.outputMode == OUTPUT_TRS ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreSerial.sendAfterTouch(MSBvalue, channel);
+  }
+  if (device.activePreset.outputMode == OUTPUT_USB ||
+      device.activePreset.outputMode == OUTPUT_BOTH)
+  {
+    MIDICoreUSB.sendAfterTouch(MSBvalue, channel);
   }
   n32b_display.blinkDot(1);
 }
