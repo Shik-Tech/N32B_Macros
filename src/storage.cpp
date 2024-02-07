@@ -30,8 +30,11 @@ void formatFactory()
 
   for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
   {
+#ifdef N32Bv3
+    uint8_t indexId = i;
+#else
     uint8_t indexId = pgm_read_word_near(knobsLocation + i);
-
+#endif
     defaultPreset.knobInfo[indexId].MSB = i;
     defaultPreset.knobInfo[indexId].LSB = i + 32;
     defaultPreset.knobInfo[indexId].MIN_A = 0;

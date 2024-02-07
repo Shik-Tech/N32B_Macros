@@ -33,8 +33,10 @@ public:
 
     // Setters
     void setState(Pot_t::State s) { potData.state = s; }
-    void setMSBValue() { potData.MSBValue = 0x7f & (calculate14bitValue() >> 7); }
-    void setLSBValue() { potData.LSBValue = 0x7f & calculate14bitValue(); }
+    // void setMSBValue() { potData.MSBValue = 0x7f & (calculate14bitValue() >> 7); }
+    // void setLSBValue() { potData.LSBValue = 0x7f & calculate14bitValue(); }
+    void setMSBValue() { potData.MSBValue = 0x7f & (potData.current_value >> 7); }
+    void setLSBValue() { potData.LSBValue = 0x7f & potData.current_value; }
     void setCurrentValue(uint16_t v) { potData.current_value = v; }
     void setPreviousValue() { potData.previous_value = potData.current_value; }
     void resetReleaseCounter() { potData.release_counter = 0; }

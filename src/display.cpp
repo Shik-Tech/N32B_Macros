@@ -11,7 +11,7 @@ const static byte chars[] = {
     B01111110, B00110000, B01101101, B01111001, B00110011, B01011011, B01011111, B01110000, B01111111, B01111011};
 
 // Auto clear the display
-void N32B_DISPLAY::clearDisplay(uint8_t readInterval)
+void N32B_DISPLAY::clearDisplay(uint16_t readInterval)
 {
     if (millis() - displayOffTimer >= readInterval)
     {
@@ -21,13 +21,18 @@ void N32B_DISPLAY::clearDisplay(uint8_t readInterval)
 
 void N32B_DISPLAY::showValue(uint8_t value)
 {
-    clear();
-    printDigit(value);
-    if (value > 99)
-    {
-        write(1, chars[value % 10] | B10000000);
-    }
-    displayOffTimer = millis();
+    // unsigned long currentTime = millis();
+    // if (currentTime - lastUpdateTime > 50)
+    // {
+        clear();
+        printDigit(value);
+        if (value > 99)
+        {
+            write(1, chars[value % 10] | B10000000);
+        }
+        displayOffTimer = millis();
+        // lastUpdateTime = currentTime;
+    // }
 }
 
 // Blink the decimal points

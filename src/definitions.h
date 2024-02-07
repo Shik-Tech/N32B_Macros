@@ -27,7 +27,7 @@ USING_NAMESPACE_MIDI;
 constexpr uint8_t threshold_idle_to_motion = 2;
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 1, 0};
+const uint8_t firmwareVersion[] PROGMEM = {4, 1, 2};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
@@ -36,6 +36,24 @@ extern ezButton buttonA;
 extern ezButton buttonB;
 
 /* Pin setup */
+#ifdef N32Bv3
+enum PinIndices
+{
+  MUX_A_SIG = 8,
+  MUX_B_SIG = 9,
+  MIDI_TX_PIN = 1,
+  MUX_S0 = 4,
+  MUX_S1 = 5,
+  MUX_S2 = 6,
+  MUX_S3 = 7,
+  LED_PIN = 17,
+  DIN = 16,
+  CS = 10,
+  CLK = 15,
+  BUTTON_A_PIN = A3,
+  BUTTON_B_PIN = A2
+};
+#else
 enum PinIndices
 {
   MUX_A_SIG = 8,
@@ -52,6 +70,7 @@ enum PinIndices
   BUTTON_A_PIN = A3,
   BUTTON_B_PIN = A2
 };
+#endif
 
 enum COMMANDS_INDEXS
 {

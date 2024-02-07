@@ -87,6 +87,24 @@ void sendActivePreset()
     // Send current preset
     for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
     {
+#ifdef N32Bv3
+        uint8_t channel_a = device.activePreset.knobInfo[i].CHANNELS >> 4;
+        uint8_t channel_b = device.activePreset.knobInfo[i].CHANNELS & 0xF;
+        uint8_t knobsData[12] = {
+            SHIK_MANUFACTURER_ID,
+            SYNC_KNOBS,
+            i,
+            device.activePreset.knobInfo[i].MSB,
+            device.activePreset.knobInfo[i].LSB,
+            channel_a,
+            channel_b,
+            device.activePreset.knobInfo[i].PROPERTIES,
+            device.activePreset.knobInfo[i].MIN_A,
+            device.activePreset.knobInfo[i].MAX_A,
+            device.activePreset.knobInfo[i].MIN_B,
+            device.activePreset.knobInfo[i].MAX_B};
+        MIDICoreUSB.sendSysEx(12, knobsData);
+#else
         uint8_t indexId = pgm_read_word_near(knobsLocation + i);
         uint8_t channel_a = device.activePreset.knobInfo[indexId].CHANNELS >> 4;
         uint8_t channel_b = device.activePreset.knobInfo[indexId].CHANNELS & 0xF;
@@ -104,6 +122,7 @@ void sendActivePreset()
             device.activePreset.knobInfo[indexId].MIN_B,
             device.activePreset.knobInfo[indexId].MAX_B};
         MIDICoreUSB.sendSysEx(12, knobsData);
+#endif
     }
 
     uint8_t presetThruData[3] = {

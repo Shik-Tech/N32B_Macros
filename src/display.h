@@ -18,7 +18,7 @@ class N32B_DISPLAY : public DigitLedDisplay
 public:
   N32B_DISPLAY(uint8_t DIN, uint8_t CS, uint8_t CLK) : DigitLedDisplay(DIN, CS, CLK){};
 
-  void clearDisplay(uint8_t readInterval = 150);
+  void clearDisplay(uint16_t readInterval = 1000);
   void showValue(uint8_t);
   void blinkDot(uint8_t);
   void showChannelNumber(uint8_t);
@@ -29,6 +29,7 @@ public:
 
 private:
   unsigned long displayOffTimer;
+  // unsigned long lastUpdateTime;
 };
 
 #endif

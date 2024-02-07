@@ -189,7 +189,8 @@ void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t L
       MIDICoreUSB.sendControlChange(currentKnob->LSB, LSBvalue, channel);
     }
   }
-  n32b_display.blinkDot(1);
+  // n32b_display.blinkDot(1);
+  n32b_display.showValue(MSBvalue);
 }
 
 void sendMacroCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel_a, midi::Channel channel_b)
