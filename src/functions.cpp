@@ -60,12 +60,13 @@ void updateKnob(const uint8_t &index)
   if (pot->getState() == Pot_t::IN_MOTION)
   {
     Knob_t *currentKnob = &device.activePreset.knobInfo[index];
-    Pot *pot = &device.pots[index];
 
-    uint8_t oldMSBValue = pot->getMSBValue();
-    uint8_t oldLSBValue = pot->getLSBValue();
-    pot->setMSBValue();
-    pot->setLSBValue();
+    uint16_t fullCurrentValue = pot->getCurrentValue();
+    uint16_t fullPreviousValue = pot->getPreviousValue();
+    uint8_t MSBSendValue = (fullCurrentValue >> 7) & 0x7F;
+    uint8_t LSBSendValue;
+    uint8_t oldMSBValue = (fullPreviousValue >> 7) & 0x7F;
+    uint8_t oldLSBValue = fullPreviousValue & 0x7F;
     uint8_t mode = extractMode(currentKnob->PROPERTIES);
 
     midi::Channel channel_a =
@@ -78,82 +79,97 @@ void updateKnob(const uint8_t &index)
             ? extractChannel(currentKnob->CHANNELS, CHANNEL_B)
             : device.globalChannel;
 
-    uint8_t MSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MIN_A, currentKnob->MAX_A);
+    MSBSendValue = map(MSBSendValue, 0, 127, currentKnob->MIN_A, currentKnob->MAX_A);
     if (bitRead(currentKnob->PROPERTIES, INVERT_A_PROPERTY))
     {
-      MSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MAX_A, currentKnob->MIN_A);
+      MSBSendValue = map(MSBSendValue, 0, 127, currentKnob->MAX_A, currentKnob->MIN_A);
     }
-
-    uint8_t LSBSendValue;
 
     if (extractMode(currentKnob->PROPERTIES) == KNOB_MODE_HIRES)
     {
-      LSBSendValue = pot->getLSBValue();
+      // Define the total range based on the knob's min and max settings
+      uint16_t totalRange = ((currentKnob->MAX_A - currentKnob->MIN_A + 1) << 7);
 
-      uint8_t mappedValue = (LSBSendValue < 16) ? 0 : ((LSBSendValue == 16) ? 16 : (LSBSendValue | 0xF));
-      LSBSendValue = bitRead(currentKnob->PROPERTIES, INVERT_A_PROPERTY) ? 127 - mappedValue : mappedValue;
+      // Scale the 14-bit value to the defined total range
+      uint32_t scaledValue = ((uint32_t)fullCurrentValue * totalRange) >> 14;
+      if (scaledValue > 16383)
+        scaledValue = 16383; // Cap the total range to 14-bit max if it exceeds
+
+      // Calculate the MSB and LSB from the scaled value
+      MSBSendValue = (scaledValue >> 7) & 0x7F; // Get the top 7 bits as MSB
+      LSBSendValue = scaledValue & 0x7F;        // Get the bottom 7 bits as LSB
+
+      // Adjust MSB based on the knob's MIN_A to ensure it starts from the defined minimum
+      MSBSendValue += currentKnob->MIN_A;
+
+      // Invert the values if required by the knob's properties
+      if (bitRead(currentKnob->PROPERTIES, INVERT_A_PROPERTY))
+      {
+        MSBSendValue = currentKnob->MAX_A - (MSBSendValue - currentKnob->MIN_A);
+        LSBSendValue = 127 - LSBSendValue;
+      }
     }
     else
     {
-      LSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MIN_B, currentKnob->MAX_B);
+      LSBSendValue = map(MSBSendValue, 0, 127, currentKnob->MIN_B, currentKnob->MAX_B);
       if (bitRead(currentKnob->PROPERTIES, INVERT_B_PROPERTY))
       {
-        LSBSendValue = map(pot->getMSBValue(), 0, 127, currentKnob->MAX_B, currentKnob->MIN_B);
+        LSBSendValue = map(MSBSendValue, 0, 127, currentKnob->MAX_B, currentKnob->MIN_B);
       }
     }
 
     switch (mode)
     {
     case KNOB_MODE_STANDARD:
-      if (oldMSBValue != pot->getMSBValue())
+      if (oldMSBValue != MSBSendValue)
       {
         sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_HIRES:
-      if (oldLSBValue != pot->getLSBValue())
+      if (oldLSBValue != LSBSendValue)
       {
         sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_MACRO:
-      if (oldMSBValue != pot->getMSBValue())
+      if (oldMSBValue != MSBSendValue)
       {
         sendMacroCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
       }
       break;
 
     case KNOB_MODE_NRPN:
-      if (oldLSBValue != pot->getLSBValue())
+      if (oldLSBValue != LSBSendValue)
       {
         sendNRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_RPN:
-      if (oldLSBValue != pot->getLSBValue())
+      if (oldLSBValue != LSBSendValue)
       {
         sendRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_PROGRAM_CHANGE:
-      if (oldMSBValue != pot->getMSBValue())
+      if (oldMSBValue != MSBSendValue)
       {
         sendProgramChange(MSBSendValue, channel_a);
       }
       break;
 
     case KNOB_MODE_POLY_AFTER_TOUCH:
-      if (oldMSBValue != pot->getMSBValue())
+      if (oldMSBValue != MSBSendValue)
       {
         sendPolyAfterTouch(currentKnob, MSBSendValue, channel_a);
       }
       break;
     case KNOB_MODE_MONO_AFTER_TOUCH:
-      if (oldMSBValue != pot->getMSBValue())
+      if (oldMSBValue != MSBSendValue)
       {
         sendMonoAfterTouch(MSBSendValue, channel_a);
       }
@@ -166,6 +182,8 @@ void updateKnob(const uint8_t &index)
       //        }
       //        break;
     }
+
+    pot->setPreviousValue();
   }
 }
 
