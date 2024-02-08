@@ -51,17 +51,20 @@ void ADC_MUX::update(const uint8_t &index)
     //         counter++;
     //     }
     // }
-    if (index == 0)
-    {
-        Serial.print("sensorRead: ");
-        Serial.println(sensorRead);
-        Serial.print("filteredValue: ");
-        Serial.println(filteredValue);
-    }
 
-    // filteredValue = constrain(map(filteredValue, 15, 16368, 0, 16383), 0, 16383);
+
+    filteredValue = constrain(map(filteredValue, 39, 16341, 0, 16383), 0, 16383);
     pot.setCurrentValue(filteredValue);
 
+
+    // if (index == 0)
+    // {
+    //     Serial.print("sensorRead: ");
+    //     Serial.println(sensorRead);
+    //     Serial.print("filteredValue: ");
+    //     Serial.println(filteredValue);
+    // }
+    
     // uint16_t value_difference = abs(static_cast<int>(pot.getCurrentValue()) - static_cast<int>(pot.getPreviousValue()));
     // uint16_t value_difference = abs((int) pot.getCurrentValue() - (int) pot.getPreviousValue());
     uint16_t value_difference = (filteredValue >= pot.getPreviousValue()) ? (filteredValue - pot.getPreviousValue()) : (pot.getPreviousValue() - filteredValue);
