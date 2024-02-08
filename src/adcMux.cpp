@@ -33,7 +33,10 @@ void ADC_MUX::update(const uint8_t &index)
     const uint16_t sensorRead = read(index);
 
     Pot &pot = pots[index];
-    uint16_t filteredValue = FixedPoint_EMA(sensorRead, pot.getPreviousValue(), 4);
+
+    // uint16_t filteredValue = FixedPoint_EMA(sensorRead, pot.getPreviousValue(), 4);
+    uint16_t filteredValue = FixedPoint_EMA(sensorRead, pot.getPreviousValue() >> 1, 3) << 1;
+    // uint16_t filteredValue = sensorRead << 4;
     // const uint16_t currentThresholdValue = filteredValue >> 2;
     // const uint16_t previousThresholdValue = ;
 
@@ -52,10 +55,9 @@ void ADC_MUX::update(const uint8_t &index)
     //     }
     // }
 
-
-    filteredValue = constrain(map(filteredValue, 39, 16341, 0, 16383), 0, 16383);
+    // filteredValue = constrain(map(filteredValue, 39, 16341, 0, 16383), 0, 16383);
+    filteredValue = constrain(map(filteredValue, 48, 16338, 0, 16383), 0, 16383);
     pot.setCurrentValue(filteredValue);
-
 
     // if (index == 0)
     // {
@@ -64,7 +66,7 @@ void ADC_MUX::update(const uint8_t &index)
     //     Serial.print("filteredValue: ");
     //     Serial.println(filteredValue);
     // }
-    
+
     // uint16_t value_difference = abs(static_cast<int>(pot.getCurrentValue()) - static_cast<int>(pot.getPreviousValue()));
     // uint16_t value_difference = abs((int) pot.getCurrentValue() - (int) pot.getPreviousValue());
     uint16_t value_difference = (filteredValue >= pot.getPreviousValue()) ? (filteredValue - pot.getPreviousValue()) : (pot.getPreviousValue() - filteredValue);
