@@ -10,7 +10,11 @@
 USBMIDI_CREATE_INSTANCE(0, MIDICoreUSB);
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDICoreSerial);
 
+#ifdef N32Bv3
+N32B_DISPLAY n32b_display(SIN, SCLK, LAT, BLANK);
+#else
 N32B_DISPLAY n32b_display(DIN, CS, CLK);
+#endif
 
 ezButton buttonA(BUTTON_A_PIN);
 ezButton buttonB(BUTTON_B_PIN);

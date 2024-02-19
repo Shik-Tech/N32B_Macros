@@ -47,9 +47,10 @@ enum PinIndices
   MUX_S2 = 6,
   MUX_S3 = 7,
   LED_PIN = 17,
-  DIN = 16,
-  CS = 10,
-  CLK = 15,
+  SIN = 16,
+  LAT = 10,
+  SCLK = 15,
+  BLANK = 14,
   BUTTON_A_PIN = A3,
   BUTTON_B_PIN = A2
 };

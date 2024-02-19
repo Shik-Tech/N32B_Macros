@@ -16,8 +16,12 @@ ADC_MUX muxFactory(device.pots);
 
 void setup()
 {
+#ifndef N32Bv3
   n32b_display.setBright(0);
   n32b_display.setDigitLimit(2);
+#else
+  n32b_display.on();
+#endif
 
   /* Pin setup */
   pinMode(MIDI_TX_PIN, OUTPUT);
