@@ -166,6 +166,7 @@ struct Knob_t
   uint8_t MAX_B;
   uint8_t CHANNELS; // Use MSB 4-bit for Channel A, use LSB 4-bit for Channel B
   uint8_t PROPERTIES;
+  // char name[3];
   /*
   Using Properties to reduce storage size.
   Bits are used as boolean values for inverts and use own channel:
