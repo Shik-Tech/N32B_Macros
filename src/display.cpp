@@ -89,11 +89,11 @@ void N32B_DISPLAY::showPresetNumber(uint8_t presetNumber)
 
 void N32B_DISPLAY::showStartUpAnimation()
 {
+#ifndef N32Bv3
     uint8_t delayTime = 160;
     uint8_t repeats = 5;
     for (uint8_t i = 0; i < repeats; i++)
     {
-#ifndef N32Bv3
         write(1, B00000001);
         write(2, B00001000);
 
@@ -109,30 +109,84 @@ void N32B_DISPLAY::showStartUpAnimation()
         write(2, B01000000);
         delay(delayTime);
         clear();
-#else
-        clear();
-        setDigit(0, MAX7219DIGIT(B00000001));
-        setDigit(1, MAX7219DIGIT(B00001000));
-        flush();
-
-        delay(delayTime);
-
-        setDigit(0, MAX7219DIGIT(B01000000));
-        setDigit(1, MAX7219DIGIT(B00000001));
-        flush();
-
-        delay(delayTime);
-
-        setDigit(0, MAX7219DIGIT(B00001000));
-        setDigit(1, MAX7219DIGIT(B01000000));
-        flush();
-
-        delay(delayTime);
-
-        clear();
-        flush();
-#endif
     }
+#else
+    uint8_t delayTime = 60;
+    clear();
+
+    setDigit(2, MAX7219DIGIT(B00001000));
+    setDigit(1, MAX7219DIGIT(B00000000));
+    setDigit(0, MAX7219DIGIT(B00000000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B00001000));
+    setDigit(1, MAX7219DIGIT(B00001000));
+    setDigit(0, MAX7219DIGIT(B00000000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B00001000));
+    setDigit(1, MAX7219DIGIT(B00001000));
+    setDigit(0, MAX7219DIGIT(B00001000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B00001000));
+    setDigit(1, MAX7219DIGIT(B00001000));
+    setDigit(0, MAX7219DIGIT(B00011000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B00001000));
+    setDigit(1, MAX7219DIGIT(B00001000));
+    setDigit(0, MAX7219DIGIT(B00111000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B00001000));
+    setDigit(1, MAX7219DIGIT(B00001000));
+    setDigit(0, MAX7219DIGIT(B01111000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B00001000));
+    setDigit(1, MAX7219DIGIT(B01001000));
+    setDigit(0, MAX7219DIGIT(B01111000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B01001000));
+    setDigit(1, MAX7219DIGIT(B01001000));
+    setDigit(0, MAX7219DIGIT(B01111000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B01001010));
+    setDigit(1, MAX7219DIGIT(B01001000));
+    setDigit(0, MAX7219DIGIT(B01111000));
+    flush();
+
+    delay(delayTime);
+
+    setDigit(2, MAX7219DIGIT(B01001110));
+    setDigit(1, MAX7219DIGIT(B01001000));
+    setDigit(0, MAX7219DIGIT(B01111000));
+    flush();
+
+    delay(300);
+
+    clear();
+    flush();
+#endif
     displayOffTimer = millis();
 }
 
