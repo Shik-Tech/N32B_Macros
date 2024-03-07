@@ -27,22 +27,17 @@ void N32B_DISPLAY::clearDisplay(uint16_t readInterval)
 void N32B_DISPLAY::showValue(uint8_t value)
 {
 #ifndef N32Bv3
-    // unsigned long currentTime = millis();
-    // if (currentTime - lastUpdateTime > 50)
-    // {
-        clear();
-        printDigit(value);
-        if (value > 99)
-        {
-            write(1, chars[value % 10] | B10000000);
-        }
-        displayOffTimer = millis();
-        // lastUpdateTime = currentTime;
-    // }
+    clear();
+    printDigit(value);
+    if (value > 99)
+    {
+        write(1, chars[value % 10] | B10000000);
+    }
+    displayOffTimer = millis();
 #else
     setNumber(value);
     flush();
-    
+
     displayOffTimer = millis();
 #endif
 }
@@ -60,7 +55,7 @@ void N32B_DISPLAY::blinkDot(uint8_t nDigit)
 {
     setDecimalPoint(nDigit);
     flush();
-    
+
     displayOffTimer = millis();
 }
 #endif
@@ -68,13 +63,14 @@ void N32B_DISPLAY::blinkDot(uint8_t nDigit)
 void N32B_DISPLAY::showChannelNumber(uint8_t channelNumber)
 {
 #ifndef N32Bv3
-	clear();
+    clear();
     printDigit(channelNumber);
 #else
     setNumber(channelNumber);
+    setDigit(2, MAX7219DIGIT(B01001110));
     flush();
 #endif
-	displayOffTimer = millis();
+    displayOffTimer = millis();
 }
 
 void N32B_DISPLAY::showPresetNumber(uint8_t presetNumber)
@@ -120,19 +116,19 @@ void N32B_DISPLAY::showStartUpAnimation()
         flush();
 
         delay(delayTime);
-        
+
         setDigit(0, MAX7219DIGIT(B01000000));
         setDigit(1, MAX7219DIGIT(B00000001));
         flush();
 
         delay(delayTime);
-        
+
         setDigit(0, MAX7219DIGIT(B00001000));
         setDigit(1, MAX7219DIGIT(B01000000));
         flush();
-        
+
         delay(delayTime);
-        
+
         clear();
         flush();
 #endif
@@ -195,42 +191,42 @@ void N32B_DISPLAY::factoryResetAnimation()
         setDigit(1, MAX7219DIGIT(B00010000));
         flush();
         delay(delayTime);
-        
+
         setDigit(1, MAX7219DIGIT(B00011000));
         flush();
         delay(delayTime);
-        
+
         setDigit(1, MAX7219DIGIT(B00011100));
         flush();
         delay(delayTime);
-        
+
         setDigit(1, MAX7219DIGIT(B00001101));
         flush();
         delay(delayTime);
-        
+
         setDigit(1, MAX7219DIGIT(B00000101));
         setDigit(0, MAX7219DIGIT(B00000001));
         flush();
         delay(delayTime);
-        
+
         setDigit(1, MAX7219DIGIT(B00000001));
         setDigit(0, MAX7219DIGIT(B00100001));
         flush();
         delay(delayTime);
-        
+
         setDigit(0, MAX7219DIGIT(B01100001));
         flush();
         delay(delayTime);
-        
+
         setDigit(0, MAX7219DIGIT(B01100010));
         flush();
         delay(delayTime);
-        
+
         setDigit(0, MAX7219DIGIT(B01000010));
         setDigit(1, MAX7219DIGIT(B00010000));
         flush();
         delay(delayTime);
-        
+
         clear();
         flush();
 #endif
@@ -253,24 +249,24 @@ void N32B_DISPLAY::showSaveMessage()
     delay(300);
 #else
     const uint16_t delayTime = 300;
-    
+
     clear();
-    
+
     setDigit(1, MAX7219DIGIT(B01011011));
     setDigit(0, MAX7219DIGIT(B00011100));
     flush();
     delay(delayTime);
-    
+
     const uint8_t repeats = 3;
     bool bDecimalPoint = true;
-    
+
     for (uint8_t i = 0; i < repeats; i++)
     {
         setDecimalPoint(0, bDecimalPoint);
         flush();
         delay(delayTime);
-        
-        bDecimalPoint = ! bDecimalPoint;
+
+        bDecimalPoint = !bDecimalPoint;
     }
 #endif
 }
