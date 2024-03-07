@@ -29,8 +29,8 @@ void sendProgramChange(uint8_t, midi::Channel);
 void sendPolyAfterTouch(const struct Knob_t *, uint8_t, midi::Channel);
 void sendMonoAfterTouch(uint8_t, midi::Channel);
 
-void changeChannel(const bool &);
-void changePreset(const bool &);
+void changeChannel(bool);
+void changePreset(bool);
 
 void buttonReleaseAction(const bool &);
 void buttonPressAction(const bool &);

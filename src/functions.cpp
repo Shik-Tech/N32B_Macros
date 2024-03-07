@@ -313,27 +313,22 @@ void sendMonoAfterTouch(uint8_t MSBvalue, midi::Channel channel)
   n32b_display.blinkDot(1);
 }
 
-void changeChannel(const bool &direction)
+void changeChannel(bool direction)
 {
   if (direction)
   {
     // Next Channel
-    if (device.globalChannel < 16)
-      device.globalChannel++;
-    else
-      device.globalChannel = 1;
+    device.globalChannel = (device.globalChannel % 16) + 1;
   }
   else
   {
     // Previous Channel
-    if (device.globalChannel > 1)
-      device.globalChannel--;
-    else
-      device.globalChannel = 16;
+    device.globalChannel = (device.globalChannel - 2 + 16) % 16 + 1;
   }
+  n32b_display.showChannelNumber(device.globalChannel);
 }
 
-void changePreset(const bool &direction)
+void changePreset(bool direction)
 {
   if (direction)
   {
@@ -358,18 +353,7 @@ void buttonReleaseAction(const bool &direction)
   direction ? isPressingAButton = false : isPressingBButton = false;
 
   if (millis() - pressedTime < SHORT_PRESS_TIME)
-  {
-    if (device.isPresetMode)
-    {
-      changePreset(direction);
-      n32b_display.showPresetNumber(device.currentPresetIndex);
-    }
-    else
-    {
-      changeChannel(direction);
-      n32b_display.showChannelNumber(device.globalChannel);
-    }
-  }
+    device.isPresetMode ? changePreset(direction) : changeChannel(direction);
 }
 
 void buttonPressAction(const bool &direction)
