@@ -111,7 +111,7 @@ void N32B_DISPLAY::showStartUpAnimation()
         clear();
     }
 #else
-    uint8_t delayTime = 60;
+    uint8_t delayTime = 120;
     clear();
 
     setDigit(2, MAX7219DIGIT(B00001000));
