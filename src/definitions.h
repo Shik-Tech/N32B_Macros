@@ -27,7 +27,7 @@ USING_NAMESPACE_MIDI;
 constexpr uint8_t threshold_idle_to_motion = 8;
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 1, 3};
+const uint8_t firmwareVersion[] PROGMEM = {4, 1, 4};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
@@ -166,7 +166,6 @@ struct Knob_t
   uint8_t MAX_B;
   uint8_t CHANNELS; // Use MSB 4-bit for Channel A, use LSB 4-bit for Channel B
   uint8_t PROPERTIES;
-  // char name[3];
   /*
   Using Properties to reduce storage size.
   Bits are used as boolean values for inverts and use own channel:
@@ -196,6 +195,7 @@ struct Device_t
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   bool isPresetMode{false};
+  uint16_t isStartupCounter = 0;
 };
 
 /* Device setup data */

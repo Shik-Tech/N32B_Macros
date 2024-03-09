@@ -25,7 +25,6 @@ uint16_t ADC_MUX::FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t 
     return (uint16_t)(nPrevValue + nSample - (nPrevValue >> nAlphaShift));
 }
 
-uint8_t counter = 0;
 void ADC_MUX::update(const uint8_t &index)
 {
     setMultiplexer(index);
@@ -36,33 +35,17 @@ void ADC_MUX::update(const uint8_t &index)
 
     // uint16_t filteredValue = FixedPoint_EMA(sensorRead, pot.getPreviousValue(), 4);
     uint16_t filteredValue = FixedPoint_EMA(sensorRead, pot.getPreviousValue() >> 1, 3) << 1;
-    // uint16_t filteredValue = sensorRead << 4;
-    // const uint16_t currentThresholdValue = filteredValue >> 2;
-    // const uint16_t previousThresholdValue = ;
-
-    // if (index == 0)
-    // {
-    //     if (counter == 0 || counter > 499)
-    //     {
-    //         Serial.println("---------");
-    //         delay(5000);
-    //         counter = 0;
-    //     }
-    //     if (counter < 500)
-    //     {
-    //         Serial.println(sensorRead);
-    //         counter++;
-    //     }
-    // }
 
     // filteredValue = constrain(map(filteredValue, 39, 16341, 0, 16383), 0, 16383);
-    filteredValue = constrain(map(filteredValue, 48, 16338, 0, 16383), 0, 16383);
+    filteredValue = constrain(map(filteredValue, 44, 16338, 0, 16383), 0, 16383);
     pot.setCurrentValue(filteredValue);
 
     // if (index == 0)
     // {
     //     Serial.print("sensorRead: ");
     //     Serial.println(sensorRead);
+    //     Serial.print("previous filteredValue: ");
+    //     Serial.println(pot.getPreviousValue());
     //     Serial.print("filteredValue: ");
     //     Serial.println(filteredValue);
     // }
