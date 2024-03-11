@@ -39,16 +39,28 @@ TLC59282_Display::TLC59282_Display(uint8_t SIN, uint8_t SCLK, uint8_t LAT, uint8
 	digitalWrite(Pin_BLANK, HIGH);
 	
 	clear();
+	bChanged = false;
+	bOn = false;
 }
 
 void TLC59282_Display::on()
 {
-	digitalWrite(Pin_BLANK, LOW);
+	if (!bOn)
+	{
+		digitalWrite(Pin_BLANK, LOW);
+		bOn = true;
+		bChanged = true;
+	}
 }
 
 void TLC59282_Display::off()
 {
-	digitalWrite(Pin_BLANK, HIGH);
+	if (bOn)
+	{
+		digitalWrite(Pin_BLANK, HIGH);
+		bOn = false;
+		bChanged = true;
+	}
 }
 
 void TLC59282_Display::toggleLAT()
@@ -80,6 +92,9 @@ void TLC59282_Display::flush(uint8_t nbDigits)
 		writeByte(Digits[i - 1]);
 	
 	toggleLAT();
+	
+	if (bOn)
+		bChanged = true;
 }
 
 void TLC59282_Display::clear()

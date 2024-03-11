@@ -31,6 +31,9 @@ class TLC59282_Display
 		
 		void toggleLAT();
 		void writeByte(uint8_t data);
+		
+		bool bChanged;
+		bool bOn;
 	
 	public:
 		TLC59282_Display(uint8_t SIN, uint8_t SCLK, uint8_t LAT, uint8_t BLANK);
@@ -40,6 +43,9 @@ class TLC59282_Display
 		void flush(uint8_t nbDigits = Display_NbDigits);
 		
 		void clear();
+		
+		bool hasChanged() { return bChanged; }
+		void resetChanged() { bChanged = false; }
 		
 		// nDigit in 0..2.
 		void setDigit(uint8_t nDigit, uint8_t data);

@@ -110,10 +110,20 @@ void loop()
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
     muxFactory.update(currentKnob);
+  }
+  
+  n32b_display.resetChanged();
+  
+  for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
+  {
     updateKnob(currentKnob);
   }
+  
   doMidiRead();
 
   renderButtonFunctions();
   n32b_display.clearDisplay();
+  
+  if (n32b_display.hasChanged())
+    delayMicroseconds(200);
 }

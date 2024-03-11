@@ -28,7 +28,7 @@ uint16_t ADC_MUX::FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t 
 void ADC_MUX::update(const uint8_t &index)
 {
     setMultiplexer(index);
-    delayMicroseconds(10);
+    delayMicroseconds(50);
     const uint16_t sensorRead = read(index);
 
     Pot &pot = pots[index];
