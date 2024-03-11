@@ -42,7 +42,7 @@ public:
 
 private:
   unsigned long displayOffTimer;
-  // unsigned long lastUpdateTime;
+  unsigned long lastUpdateTime;
 };
 
 #endif

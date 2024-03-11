@@ -26,6 +26,10 @@ void N32B_DISPLAY::clearDisplay(uint16_t readInterval)
 
 void N32B_DISPLAY::showValue(uint8_t value)
 {
+    // TODO: Force last value to update the display to prevent missing the last value showing
+    if (millis() - lastUpdateTime < 10)
+        return;
+
 #ifndef N32Bv3
     clear();
     printDigit(value);
@@ -38,6 +42,7 @@ void N32B_DISPLAY::showValue(uint8_t value)
     setNumber(value);
     flush();
 
+    lastUpdateTime = millis();
     displayOffTimer = millis();
 #endif
 }

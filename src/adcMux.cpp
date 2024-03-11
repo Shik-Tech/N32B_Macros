@@ -39,15 +39,25 @@ void ADC_MUX::update(const uint8_t &index)
     // filteredValue = constrain(map(filteredValue, 39, 16341, 0, 16383), 0, 16383);
     filteredValue = constrain(map(filteredValue, 44, 16338, 0, 16383), 0, 16383);
     pot.setCurrentValue(filteredValue);
-
     // if (index == 0)
     // {
-    //     Serial.print("sensorRead: ");
-    //     Serial.println(sensorRead);
-    //     Serial.print("previous filteredValue: ");
-    //     Serial.println(pot.getPreviousValue());
-    //     Serial.print("filteredValue: ");
-    //     Serial.println(filteredValue);
+    //     if (count < 10)
+    //     {
+    //         Serial.print("sensorRead: ");
+    //         Serial.println(sensorRead);
+    //         Serial.print("previous filteredValue: ");
+    //         Serial.println(pot.getPreviousValue());
+    //         Serial.print("filteredValue: ");
+    //         Serial.println(filteredValue);
+
+    //         count++;
+    //     }
+    //     else
+    //     {
+    //         Serial.println("-------");
+    //         delay(5000);
+    //         count = 0;
+    //     }
     // }
 
     // uint16_t value_difference = abs(static_cast<int>(pot.getCurrentValue()) - static_cast<int>(pot.getPreviousValue()));
@@ -56,7 +66,7 @@ void ADC_MUX::update(const uint8_t &index)
 
     // uint16_t value_difference = (currentThresholdValue >= pot.getPreviousThresholdValue()) ? (currentThresholdValue - pot.getPreviousThresholdValue()) : (pot.getPreviousThresholdValue() - currentThresholdValue);
 
-    // if (index == 0)
+    // if (index == 0 && sensorRead != 638)
     // {
     //     Serial.println(sensorRead);
     //     Serial.println(filteredValue);

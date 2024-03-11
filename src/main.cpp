@@ -125,5 +125,5 @@ void loop()
   n32b_display.clearDisplay();
   
   if (n32b_display.hasChanged())
-    delayMicroseconds(200);
+    delayMicroseconds(1000);
 }
