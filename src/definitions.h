@@ -2,7 +2,7 @@
   N32B Macros Firmware v4.x.x
   MIT License
 
-  Copyright (c) 2023 SHIK
+  Copyright (c) 2024 SHIK
 */
 
 /*
@@ -13,25 +13,53 @@
 #define N32B_DEFINITIONS
 
 #include <Arduino.h>
+#include <vector>
+
 #include <USB-MIDI.h>
 #include <ezButton.h>
 
-#include "mux_factory.h"
+#include <Pot.h>
+
 #include "display.h"
 
 USING_NAMESPACE_MIDI;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 0, 2};
+#ifndef N32Bv3
+constexpr uint8_t threshold_idle_to_motion = 4;
+#else
+constexpr uint8_t threshold_idle_to_motion = 2;
+#endif
+constexpr uint8_t threshold_motion_to_idle = 16;
+
+const uint8_t firmwareVersion[] PROGMEM = {4, 1, 0};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
-extern MUX_FACTORY muxFactory;
 extern N32B_DISPLAY n32b_display;
 extern ezButton buttonA;
 extern ezButton buttonB;
 
 /* Pin setup */
-enum PINS
+#ifdef N32Bv3
+enum PinIndices
+{
+  MUX_A_SIG = 8,
+  MUX_B_SIG = 9,
+  MIDI_TX_PIN = 1,
+  MUX_S0 = 4,
+  MUX_S1 = 5,
+  MUX_S2 = 6,
+  MUX_S3 = 7,
+  LED_PIN = 17,
+  SIN = 16,
+  LAT = 10,
+  SCLK = 15,
+  BLANK = 14,
+  BUTTON_A_PIN = A3,
+  BUTTON_B_PIN = A2
+};
+#else
+enum PinIndices
 {
   MUX_A_SIG = 8,
   MUX_B_SIG = 9,
@@ -47,6 +75,7 @@ enum PINS
   BUTTON_A_PIN = A3,
   BUTTON_B_PIN = A2
 };
+#endif
 
 enum COMMANDS_INDEXS
 {
@@ -84,7 +113,10 @@ enum KNOB_MODES
   KNOB_MODE_MACRO = 2,
   KNOB_MODE_NRPN = 3,
   KNOB_MODE_RPN = 4,
-  KNOB_MODE_HIRES = 5
+  KNOB_MODE_HIRES = 5,
+  KNOB_MODE_PROGRAM_CHANGE = 6,
+  KNOB_MODE_MONO_AFTER_TOUCH = 7,
+  KNOB_MODE_POLY_AFTER_TOUCH = 8
 };
 
 // General definitions
@@ -163,15 +195,16 @@ struct Preset_t
 struct Device_t
 {
   Preset_t activePreset{0};
-  uint16_t knobValues[32][3]{0};
+  Pot pots[NUMBER_OF_KNOBS];
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   bool isPresetMode{false};
+  // uint16_t isStartupCounter = 0;
 };
 
 /* Device setup data */
 extern Device_t device;
-extern float EMA_a; // EMA alpha
+// extern float EMA_a; // EMA alpha
 
 /* Buttons variables */
 extern const unsigned int reset_timeout; // Reset to factory preset timeout

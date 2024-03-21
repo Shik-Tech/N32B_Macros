@@ -2,7 +2,7 @@
   N32B Macros Firmware v4.x.x
   MIT License
 
-  Copyright (c) 2023 SHIK
+  Copyright (c) 2024 SHIK
 */
 
 #include "definitions.h"
@@ -10,15 +10,17 @@
 USBMIDI_CREATE_INSTANCE(0, MIDICoreUSB);
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDICoreSerial);
 
-MUX_FACTORY muxFactory;
+#ifdef N32Bv3
+N32B_DISPLAY n32b_display(SIN, SCLK, LAT, BLANK);
+#else
 N32B_DISPLAY n32b_display(DIN, CS, CLK);
+#endif
 
 ezButton buttonA(BUTTON_A_PIN);
 ezButton buttonB(BUTTON_B_PIN);
 
 /* Device setup data */
 Device_t device;
-float EMA_a = 0.3;
 
 /* Buttons variables */
 const unsigned int reset_timeout = 4000; // Reset to factory preset timeout
