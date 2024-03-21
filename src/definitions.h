@@ -41,7 +41,7 @@ extern ezButton buttonB;
 
 /* Pin setup */
 #ifdef N32Bv3
-enum PinIndices
+enum PinIndices : uint8_t
 {
   MUX_A_SIG = 8,
   MUX_B_SIG = 9,
@@ -59,7 +59,7 @@ enum PinIndices
   BUTTON_B_PIN = A2
 };
 #else
-enum PinIndices
+enum PinIndices : uint8_t
 {
   MUX_A_SIG = 8,
   MUX_B_SIG = 9,
@@ -77,23 +77,24 @@ enum PinIndices
 };
 #endif
 
-enum COMMANDS_INDEXS
+enum COMMANDS_INDEXS : uint8_t
 {
   MANUFACTURER_INDEX = 1,
-  COMMAND_INDEX = 2,
-  KNOB_INDEX = 3, // Also used for other commands value
-  MSB_INDEX = 4,
-  LSB_INDEX = 5,
-  CHANNEL_A_INDEX = 6,
-  CHANNEL_B_INDEX = 7,
-  PROPERTIES_INDEX = 8,
-  MIN_A_INDEX = 9,
-  MAX_A_INDEX = 10,
-  MIN_B_INDEX = 11,
-  MAX_B_INDEX = 12
+  COMMAND_INDEX,
+  KNOB_INDEX, // Also used for other commands value
+  MSB_INDEX,
+  LSB_INDEX,
+  CHANNEL_A_INDEX,
+  CHANNEL_B_INDEX,
+  OUTPUTS_INDEX,
+  PROPERTIES_INDEX,
+  MIN_A_INDEX,
+  MAX_A_INDEX,
+  MIN_B_INDEX,
+  MAX_B_INDEX
 };
 
-enum COMMANDS
+enum COMMANDS : uint8_t
 {
   SET_KNOB_MODE = 1,         // Define knob mode (see KNOB_MODES)
   SAVE_PRESET = 2,           // Save the preset
@@ -106,7 +107,7 @@ enum COMMANDS
   END_OF_TRANSMISSION = 99   // Notify end of transmission
 };
 
-enum KNOB_MODES
+enum KNOB_MODES : uint8_t
 {
   KNOB_MODE_DISABLE = 0,
   KNOB_MODE_STANDARD = 1,
@@ -120,14 +121,14 @@ enum KNOB_MODES
 };
 
 // General definitions
-enum DEFINITIONS
+enum DEFINITIONS : uint8_t
 {
   SHIK_MANUFACTURER_ID = 32,
   NUMBER_OF_KNOBS = 32,
   NUMBER_OF_PRESETS = 3
 };
 
-enum PROPERTIES
+enum PROPERTIES : uint8_t
 {
   INVERT_A_PROPERTY = 0,
   INVERT_B_PROPERTY = 1,
@@ -136,13 +137,13 @@ enum PROPERTIES
   MODE_PROPERTY = 4,
 };
 
-enum CHANNEL_NAMES
+enum CHANNEL_NAMES : uint8_t
 {
   CHANNEL_A = 1,
   CHANNEL_B = 0
 };
 
-enum THRU_MODES
+enum THRU_MODES : uint8_t
 {
   THRU_OFF = 0,
   THRU_TRS_TRS = 1,
@@ -152,14 +153,27 @@ enum THRU_MODES
   THRU_BOTH_DIRECTIONS = 5
 };
 
-enum OUTPUT_MODES
+enum OUTPUT_MODES : uint8_t
 {
-  OUTPUT_TRS = 0,
-  OUTPUT_USB = 1,
-  OUTPUT_BOTH = 2
+  OUTPUT_OFF = 0,
+  OUTPUT_TRS,
+  OUTPUT_USB,
+  OUTPUT_BOTH
 };
 
 // Knob settings structure
+// Using PROPERTIES to reduce storage size.
+// Bits are used as boolean values for inverts and use own channel:
+// 1 - Invert A
+// 2 - Invert B
+// 3 - Use own channel A
+// 4 - Use own channel B
+
+// Knob mode is defined with 3 bits and need to be shifted to the right to calculate it's value:
+// 5-8 - Mode value
+
+// OUTPUTS:
+//
 struct Knob_t
 {
   uint8_t MSB;
@@ -168,19 +182,9 @@ struct Knob_t
   uint8_t MIN_B;
   uint8_t MAX_A;
   uint8_t MAX_B;
-  uint8_t CHANNELS; // Use MSB 4-bit for Channel A, use LSB 4-bit for Channel B
+  uint8_t OUTPUTS;  // MSB 2-bit for Macro A, LSB 2-bit for Macro B
+  uint8_t CHANNELS; // MSB 4-bit for Channel A, LSB 4-bit for Channel B
   uint8_t PROPERTIES;
-  /*
-  Using Properties to reduce storage size.
-  Bits are used as boolean values for inverts and use own channel:
-  1 - Invert A
-  2 - Invert B
-  3 - Use own channel A
-  4 - Use own channel B
-
-  Knob mode is defined with 3 bits and need to be shifted to the right to calculate it's value:
-  5-7 - Mode value
-  */
 };
 
 // A preset struct is defining the device preset structure
@@ -203,7 +207,6 @@ struct Device_t
 
 /* Device setup data */
 extern Device_t device;
-// extern float EMA_a; // EMA alpha
 
 /* Buttons variables */
 extern const unsigned int reset_timeout; // Reset to factory preset timeout

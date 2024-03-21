@@ -39,5 +39,6 @@ void renderButtonFunctions();
 void doMidiRead();
 uint8_t extractMode(const uint8_t &);
 uint8_t extractChannel(const uint8_t &, const bool &);
+uint8_t extractOutputs(const uint8_t &, const bool &);
 
 #endif

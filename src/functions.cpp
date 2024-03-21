@@ -182,8 +182,10 @@ void updateKnob(const uint8_t &index)
 
 void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
 {
-  if (device.activePreset.outputMode == OUTPUT_TRS ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
+
+  if (macro_a_output == OUTPUT_TRS ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.sendControlChange(currentKnob->MSB, MSBvalue, channel);
     if (extractMode(currentKnob->PROPERTIES) == KNOB_MODE_HIRES)
@@ -191,8 +193,8 @@ void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t L
       MIDICoreSerial.sendControlChange(currentKnob->LSB, LSBvalue, channel);
     }
   }
-  if (device.activePreset.outputMode == OUTPUT_USB ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreUSB.sendControlChange(currentKnob->MSB, MSBvalue, channel);
     if (extractMode(currentKnob->PROPERTIES) == KNOB_MODE_HIRES)
@@ -209,6 +211,9 @@ void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t L
 
 void sendMacroCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel_a, midi::Channel channel_b)
 {
+  uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
+  uint8_t macro_b_output = extractOutputs(currentKnob->OUTPUTS, false);
+
   if (device.activePreset.outputMode == OUTPUT_TRS ||
       device.activePreset.outputMode == OUTPUT_BOTH)
   {
@@ -437,12 +442,11 @@ uint8_t extractMode(const uint8_t &properties)
 {
   return (properties & B01110000) >> MODE_PROPERTY;
 }
-uint8_t extractChannel(const uint8_t &channels, const bool &isA)
+uint8_t extractChannel(const uint8_t &data, const bool &isMacroA)
 {
-  uint8_t outChannel = channels & 0xF;
-  if (isA)
-  {
-    outChannel = (channels & 0xF0) >> 4;
-  }
-  return outChannel + 1;
+  return (isMacroA ? (data & 0xF0) >> 4 : data & 0xF) + 1;
+}
+uint8_t extractOutputs(const uint8_t &outputs, const bool &isMacroA)
+{
+  return isMacroA ? (outputs & 0xC) >> 2 : outputs & 0x3;
 }

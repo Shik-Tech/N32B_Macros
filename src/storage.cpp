@@ -41,6 +41,7 @@ void formatFactory()
     defaultPreset.knobInfo[indexId].MIN_B = 0;
     defaultPreset.knobInfo[indexId].MAX_A = 127;
     defaultPreset.knobInfo[indexId].MAX_B = 127;
+    defaultPreset.knobInfo[indexId].OUTPUTS = B00000101;
     defaultPreset.knobInfo[indexId].CHANNELS = B00000000;
     defaultPreset.knobInfo[indexId].PROPERTIES = B00010000;
   }
