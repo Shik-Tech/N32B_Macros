@@ -24,7 +24,11 @@
 
 USING_NAMESPACE_MIDI;
 
+#ifndef N32Bv3
+constexpr uint8_t threshold_idle_to_motion = 4;
+#else
 constexpr uint8_t threshold_idle_to_motion = 2;
+#endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
 const uint8_t firmwareVersion[] PROGMEM = {4, 1, 4};
@@ -195,7 +199,7 @@ struct Device_t
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   bool isPresetMode{false};
-  uint16_t isStartupCounter = 0;
+  // uint16_t isStartupCounter = 0;
 };
 
 /* Device setup data */

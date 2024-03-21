@@ -111,19 +111,23 @@ void loop()
   {
     muxFactory.update(currentKnob);
   }
-  
+
+#ifdef N32Bv3
   n32b_display.resetChanged();
-  
+#endif
+
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
     updateKnob(currentKnob);
   }
-  
+
   doMidiRead();
 
   renderButtonFunctions();
   n32b_display.clearDisplay();
-  
+
+#ifdef N32Bv3
   if (n32b_display.hasChanged())
     delayMicroseconds(1000);
+#endif
 }

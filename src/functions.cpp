@@ -118,75 +118,76 @@ void updateKnob(const uint8_t &index)
       }
     }
 
-    if (device.isStartupCounter == 1100) // TODO: this is an ugly method to wait for startup reading is done. CHANGE IT!
+    // if (device.isStartupCounter == 1100) // TODO: this is an ugly method to wait for startup reading is done. CHANGE IT!
+    // {
+    switch (mode)
     {
-      switch (mode)
+    case KNOB_MODE_STANDARD:
+      if (oldMSBValue != MSBSendValue)
       {
-      case KNOB_MODE_STANDARD:
-        if (oldMSBValue != MSBSendValue)
-        {
-          sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
-        }
-        break;
-
-      case KNOB_MODE_HIRES:
-        if (oldLSBValue != LSBSendValue)
-        {
-          sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
-        }
-        break;
-
-      case KNOB_MODE_MACRO:
-        if (oldMSBValue != MSBSendValue)
-        {
-          sendMacroCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
-        }
-        break;
-
-      case KNOB_MODE_NRPN:
-        if (oldLSBValue != LSBSendValue)
-        {
-          sendNRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
-        }
-        break;
-
-      case KNOB_MODE_RPN:
-        if (oldLSBValue != LSBSendValue)
-        {
-          sendRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
-        }
-        break;
-
-      case KNOB_MODE_PROGRAM_CHANGE:
-        if (oldMSBValue != MSBSendValue)
-        {
-          sendProgramChange(MSBSendValue, channel_a);
-        }
-        break;
-
-      case KNOB_MODE_POLY_AFTER_TOUCH:
-        if (oldMSBValue != MSBSendValue)
-        {
-          sendPolyAfterTouch(currentKnob, MSBSendValue, channel_a);
-        }
-        break;
-      case KNOB_MODE_MONO_AFTER_TOUCH:
-        if (oldMSBValue != MSBSendValue)
-        {
-          sendMonoAfterTouch(MSBSendValue, channel_a);
-        }
-        break;
-
-        //    case KNOB_SYSEX:
-        //        if (oldLSBValue != LSBValue)
-        //        {
-        //            sendSysEx(interface, macro, pot);
-        //        }
-        //        break;
+        sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
       }
-    } else {
-      device.isStartupCounter++;
+      break;
+
+    case KNOB_MODE_HIRES:
+      if (oldLSBValue != LSBSendValue)
+      {
+        sendCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a);
+      }
+      break;
+
+    case KNOB_MODE_MACRO:
+      if (oldMSBValue != MSBSendValue)
+      {
+        sendMacroCCMessage(currentKnob, MSBSendValue, LSBSendValue, channel_a, channel_b);
+      }
+      break;
+
+    case KNOB_MODE_NRPN:
+      if (oldLSBValue != LSBSendValue)
+      {
+        sendNRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
+      }
+      break;
+
+    case KNOB_MODE_RPN:
+      if (oldLSBValue != LSBSendValue)
+      {
+        sendRPN(currentKnob, MSBSendValue, LSBSendValue, channel_a);
+      }
+      break;
+
+    case KNOB_MODE_PROGRAM_CHANGE:
+      if (oldMSBValue != MSBSendValue)
+      {
+        sendProgramChange(MSBSendValue, channel_a);
+      }
+      break;
+
+    case KNOB_MODE_POLY_AFTER_TOUCH:
+      if (oldMSBValue != MSBSendValue)
+      {
+        sendPolyAfterTouch(currentKnob, MSBSendValue, channel_a);
+      }
+      break;
+    case KNOB_MODE_MONO_AFTER_TOUCH:
+      if (oldMSBValue != MSBSendValue)
+      {
+        sendMonoAfterTouch(MSBSendValue, channel_a);
+      }
+      break;
+
+      //    case KNOB_SYSEX:
+      //        if (oldLSBValue != LSBValue)
+      //        {
+      //            sendSysEx(interface, macro, pot);
+      //        }
+      //        break;
     }
+    // }
+    // else {
+    //   device.isStartupCounter++;
+    // }
 
     pot->setPreviousValue();
   }
@@ -212,8 +213,11 @@ void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t L
       MIDICoreUSB.sendControlChange(currentKnob->LSB, LSBvalue, channel);
     }
   }
-  // n32b_display.blinkDot(1);
+#ifndef N32Bv3
+  n32b_display.blinkDot(1);
+#else
   n32b_display.showValue(MSBvalue);
+#endif
 }
 
 void sendMacroCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel_a, midi::Channel channel_b)
@@ -231,8 +235,11 @@ void sendMacroCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint
     MIDICoreUSB.sendControlChange(currentKnob->MSB, MSBvalue, channel_a);
     MIDICoreUSB.sendControlChange(currentKnob->LSB, LSBvalue, channel_b);
   }
-  // n32b_display.blinkDot(1);
+#ifndef N32Bv3
+  n32b_display.blinkDot(1);
+#else
   n32b_display.showValue(MSBvalue);
+#endif
 }
 
 void sendNRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
@@ -252,8 +259,11 @@ void sendNRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBval
     MIDICoreUSB.sendNrpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreUSB.endNrpn(channel);
   }
-  // n32b_display.blinkDot(1);
+#ifndef N32Bv3
+  n32b_display.blinkDot(1);
+#else
   n32b_display.showValue(MSBvalue);
+#endif
 }
 
 void sendRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
@@ -272,8 +282,11 @@ void sendRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalu
     MIDICoreUSB.sendRpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreUSB.endRpn(channel);
   }
-  // n32b_display.blinkDot(1);
+#ifndef N32Bv3
+  n32b_display.blinkDot(1);
+#else
   n32b_display.showValue(MSBvalue);
+#endif
 }
 
 void sendProgramChange(uint8_t MSBvalue, midi::Channel channel)
@@ -288,8 +301,11 @@ void sendProgramChange(uint8_t MSBvalue, midi::Channel channel)
   {
     MIDICoreUSB.sendProgramChange(MSBvalue, channel);
   }
-  // n32b_display.blinkDot(1);
+#ifndef N32Bv3
+  n32b_display.blinkDot(1);
+#else
   n32b_display.showValue(MSBvalue);
+#endif
 }
 
 void sendPolyAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, midi::Channel channel)
@@ -304,8 +320,11 @@ void sendPolyAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, midi
   {
     MIDICoreUSB.sendAfterTouch(currentKnob->MSB, MSBvalue, channel);
   }
-  // n32b_display.blinkDot(1);
+#ifndef N32Bv3
+  n32b_display.blinkDot(1);
+#else
   n32b_display.showValue(MSBvalue);
+#endif
 }
 
 void sendMonoAfterTouch(uint8_t MSBvalue, midi::Channel channel)
@@ -320,8 +339,11 @@ void sendMonoAfterTouch(uint8_t MSBvalue, midi::Channel channel)
   {
     MIDICoreUSB.sendAfterTouch(MSBvalue, channel);
   }
-  // n32b_display.blinkDot(1);
+#ifndef N32Bv3
+  n32b_display.blinkDot(1);
+#else
   n32b_display.showValue(MSBvalue);
+#endif
 }
 
 void changeChannel(bool direction)
