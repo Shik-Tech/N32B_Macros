@@ -118,8 +118,6 @@ void updateKnob(const uint8_t &index)
       }
     }
 
-    // if (device.isStartupCounter == 1100) // TODO: this is an ugly method to wait for startup reading is done. CHANGE IT!
-    // {
     switch (mode)
     {
     case KNOB_MODE_STANDARD:
@@ -176,18 +174,7 @@ void updateKnob(const uint8_t &index)
         sendMonoAfterTouch(MSBSendValue, channel_a);
       }
       break;
-
-      //    case KNOB_SYSEX:
-      //        if (oldLSBValue != LSBValue)
-      //        {
-      //            sendSysEx(interface, macro, pot);
-      //        }
-      //        break;
     }
-    // }
-    // else {
-    //   device.isStartupCounter++;
-    // }
 
     pot->setPreviousValue();
   }
