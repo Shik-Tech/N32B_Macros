@@ -199,7 +199,6 @@ struct Device_t
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   bool isPresetMode{false};
-  // uint16_t isStartupCounter = 0;
 };
 
 /* Device setup data */
