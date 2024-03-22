@@ -21,13 +21,8 @@ void onSerialMessage(const midi::Message<128> &);
 
 void updateKnob(const uint8_t &index);
 
-void sendCCMessage(const struct Knob_t *, uint8_t, uint8_t, midi::Channel);
-void sendMacroCCMessage(const struct Knob_t *, uint8_t, uint8_t, midi::Channel, midi::Channel);
-void sendRPN(const struct Knob_t *, uint8_t, uint8_t, midi::Channel);
-void sendNRPN(const struct Knob_t *, uint8_t, uint8_t, midi::Channel);
-void sendProgramChange(const struct Knob_t *, uint8_t, midi::Channel);
-void sendPolyAfterTouch(const struct Knob_t *, uint8_t, midi::Channel);
-void sendMonoAfterTouch(const struct Knob_t *, uint8_t, midi::Channel);
+void sendMidiMessage(const uint8_t &index);
+void sendStandardCCMessage(uint8_t, uint8_t, uint8_t, midi::Channel);
 
 void changeChannel(bool);
 void changePreset(bool);

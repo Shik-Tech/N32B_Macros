@@ -14,13 +14,10 @@
 
 #include <Arduino.h>
 #include <vector>
-
 #include <USB-MIDI.h>
 #include <ezButton.h>
-
 #include <Pot.h>
-
-#include "display.h"
+#include <display.h>
 
 USING_NAMESPACE_MIDI;
 
@@ -161,18 +158,7 @@ enum OUTPUT_MODES : uint8_t
 };
 
 // Knob settings structure
-// Using PROPERTIES to reduce storage size.
-// Bits are used as boolean values for inverts and use own channel:
-// 1 - Invert A
-// 2 - Invert B
-// 3 - Use own channel A
-// 4 - Use own channel B
 
-// Knob mode is defined with 3 bits and need to be shifted to the right to calculate it's value:
-// 5-8 - Mode value
-
-// OUTPUTS:
-//
 struct Knob_t
 {
   uint8_t MSB;
@@ -184,6 +170,15 @@ struct Knob_t
   uint8_t OUTPUTS;  // MSB 2-bit for Macro A, LSB 2-bit for Macro B
   uint8_t CHANNELS; // MSB 4-bit for Channel A, LSB 4-bit for Channel B
   uint8_t PROPERTIES;
+  // Using PROPERTIES to reduce storage size.
+  // Bits are used as boolean values for inverts and use own channel:
+  // 1 - Invert A
+  // 2 - Invert B
+  // 3 - Use own channel A
+  // 4 - Use own channel B
+
+  // Knob mode is defined with 3 bits and need to be shifted to the right to calculate it's value:
+  // 5-8 - Mode value
 };
 
 // A preset struct is defining the device preset structure

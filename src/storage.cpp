@@ -41,11 +41,11 @@ void formatFactory()
     defaultPreset.knobInfo[indexId].MIN_B = 0;
     defaultPreset.knobInfo[indexId].MAX_A = 127;
     defaultPreset.knobInfo[indexId].MAX_B = 127;
-    defaultPreset.knobInfo[indexId].OUTPUTS = B00000101;
+    defaultPreset.knobInfo[indexId].OUTPUTS = B00001111;
     defaultPreset.knobInfo[indexId].CHANNELS = B00000000;
     defaultPreset.knobInfo[indexId].PROPERTIES = B00010000;
   }
-  defaultPreset.thruMode = THRU_TRS_TRS;
+  defaultPreset.thruMode = THRU_OFF;
 
   // Write the default preset to all preset slots
   uint16_t baseAddress = 1;
