@@ -46,7 +46,6 @@ void formatFactory()
     defaultPreset.knobInfo[indexId].PROPERTIES = B00010000;
   }
   defaultPreset.thruMode = THRU_TRS_TRS;
-  defaultPreset.outputMode = OUTPUT_BOTH;
 
   // Write the default preset to all preset slots
   uint16_t baseAddress = 1;

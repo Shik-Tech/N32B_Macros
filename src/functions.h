@@ -25,9 +25,9 @@ void sendCCMessage(const struct Knob_t *, uint8_t, uint8_t, midi::Channel);
 void sendMacroCCMessage(const struct Knob_t *, uint8_t, uint8_t, midi::Channel, midi::Channel);
 void sendRPN(const struct Knob_t *, uint8_t, uint8_t, midi::Channel);
 void sendNRPN(const struct Knob_t *, uint8_t, uint8_t, midi::Channel);
-void sendProgramChange(uint8_t, midi::Channel);
+void sendProgramChange(const struct Knob_t *, uint8_t, midi::Channel);
 void sendPolyAfterTouch(const struct Knob_t *, uint8_t, midi::Channel);
-void sendMonoAfterTouch(uint8_t, midi::Channel);
+void sendMonoAfterTouch(const struct Knob_t *, uint8_t, midi::Channel);
 
 void changeChannel(bool);
 void changePreset(bool);

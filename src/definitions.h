@@ -103,7 +103,6 @@ enum COMMANDS : uint8_t
   SYNC_KNOBS = 5,            // Send active preset
   CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
   SET_THRU_MODE = 8,         // Set the midi THRU behavior
-  SET_OUTPUT_MODE = 9,       // Set the midi OUTPUT behavior
   END_OF_TRANSMISSION = 99   // Notify end of transmission
 };
 
@@ -192,7 +191,6 @@ struct Preset_t
 {
   Knob_t knobInfo[32];
   uint8_t thruMode;
-  uint8_t outputMode;
 };
 
 // A device struct is defining the device structure

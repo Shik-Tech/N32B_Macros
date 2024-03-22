@@ -158,7 +158,7 @@ void updateKnob(const uint8_t &index)
     case KNOB_MODE_PROGRAM_CHANGE:
       if (oldMSBValue != MSBSendValue)
       {
-        sendProgramChange(MSBSendValue, channel_a);
+        sendProgramChange(currentKnob, MSBSendValue, channel_a);
       }
       break;
 
@@ -171,7 +171,7 @@ void updateKnob(const uint8_t &index)
     case KNOB_MODE_MONO_AFTER_TOUCH:
       if (oldMSBValue != MSBSendValue)
       {
-        sendMonoAfterTouch(MSBSendValue, channel_a);
+        sendMonoAfterTouch(currentKnob, MSBSendValue, channel_a);
       }
       break;
     }
@@ -184,8 +184,7 @@ void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t L
 {
   uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
 
-  if (macro_a_output == OUTPUT_TRS ||
-      macro_a_output == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.sendControlChange(currentKnob->MSB, MSBvalue, channel);
     if (extractMode(currentKnob->PROPERTIES) == KNOB_MODE_HIRES)
@@ -193,8 +192,7 @@ void sendCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t L
       MIDICoreSerial.sendControlChange(currentKnob->LSB, LSBvalue, channel);
     }
   }
-  if (macro_a_output == OUTPUT_USB ||
-      macro_a_output == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB || macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreUSB.sendControlChange(currentKnob->MSB, MSBvalue, channel);
     if (extractMode(currentKnob->PROPERTIES) == KNOB_MODE_HIRES)
@@ -214,17 +212,24 @@ void sendMacroCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint
   uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
   uint8_t macro_b_output = extractOutputs(currentKnob->OUTPUTS, false);
 
-  if (device.activePreset.outputMode == OUTPUT_TRS ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  // Process outputs for macro_a
+  if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.sendControlChange(currentKnob->MSB, MSBvalue, channel_a);
-    MIDICoreSerial.sendControlChange(currentKnob->LSB, LSBvalue, channel_b);
   }
-
-  if (device.activePreset.outputMode == OUTPUT_USB ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB || macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreUSB.sendControlChange(currentKnob->MSB, MSBvalue, channel_a);
+  }
+
+  // Process outputs for macro_b
+
+  if (macro_b_output == OUTPUT_TRS || macro_b_output == OUTPUT_BOTH)
+  {
+    MIDICoreSerial.sendControlChange(currentKnob->LSB, LSBvalue, channel_b);
+  }
+  if (macro_b_output == OUTPUT_USB || macro_b_output == OUTPUT_BOTH)
+  {
     MIDICoreUSB.sendControlChange(currentKnob->LSB, LSBvalue, channel_b);
   }
 #ifndef N32Bv3
@@ -236,15 +241,17 @@ void sendMacroCCMessage(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint
 
 void sendNRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
 {
-  if (device.activePreset.outputMode == OUTPUT_TRS ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
+
+  if (macro_a_output == OUTPUT_TRS ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.beginNrpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
     MIDICoreSerial.sendNrpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreSerial.endNrpn(channel);
   }
-  if (device.activePreset.outputMode == OUTPUT_USB ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB ||
+      macro_a_output == OUTPUT_BOTH)
   {
 
     MIDICoreUSB.beginNrpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
@@ -260,15 +267,17 @@ void sendNRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBval
 
 void sendRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalue, midi::Channel channel)
 {
-  if (device.activePreset.outputMode == OUTPUT_TRS ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
+
+  if (macro_a_output == OUTPUT_TRS ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.beginRpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
     MIDICoreSerial.sendRpnValue(MSBvalue, LSBvalue, channel);
     MIDICoreSerial.endRpn(channel);
   }
-  if (device.activePreset.outputMode == OUTPUT_USB ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreUSB.beginRpn(currentKnob->MSB << 7 | currentKnob->LSB, channel);
     MIDICoreUSB.sendRpnValue(MSBvalue, LSBvalue, channel);
@@ -281,15 +290,17 @@ void sendRPN(const struct Knob_t *currentKnob, uint8_t MSBvalue, uint8_t LSBvalu
 #endif
 }
 
-void sendProgramChange(uint8_t MSBvalue, midi::Channel channel)
+void sendProgramChange(const struct Knob_t *currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
-  if (device.activePreset.outputMode == OUTPUT_TRS ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
+
+  if (macro_a_output == OUTPUT_TRS ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.sendProgramChange(MSBvalue, channel);
   }
-  if (device.activePreset.outputMode == OUTPUT_USB ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreUSB.sendProgramChange(MSBvalue, channel);
   }
@@ -302,13 +313,15 @@ void sendProgramChange(uint8_t MSBvalue, midi::Channel channel)
 
 void sendPolyAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
-  if (device.activePreset.outputMode == OUTPUT_TRS ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
+
+  if (macro_a_output == OUTPUT_TRS ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.sendAfterTouch(currentKnob->MSB, MSBvalue, channel);
   }
-  if (device.activePreset.outputMode == OUTPUT_USB ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreUSB.sendAfterTouch(currentKnob->MSB, MSBvalue, channel);
   }
@@ -319,15 +332,17 @@ void sendPolyAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, midi
 #endif
 }
 
-void sendMonoAfterTouch(uint8_t MSBvalue, midi::Channel channel)
+void sendMonoAfterTouch(const struct Knob_t *currentKnob, uint8_t MSBvalue, midi::Channel channel)
 {
-  if (device.activePreset.outputMode == OUTPUT_TRS ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  uint8_t macro_a_output = extractOutputs(currentKnob->OUTPUTS, true);
+
+  if (macro_a_output == OUTPUT_TRS ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreSerial.sendAfterTouch(MSBvalue, channel);
   }
-  if (device.activePreset.outputMode == OUTPUT_USB ||
-      device.activePreset.outputMode == OUTPUT_BOTH)
+  if (macro_a_output == OUTPUT_USB ||
+      macro_a_output == OUTPUT_BOTH)
   {
     MIDICoreUSB.sendAfterTouch(MSBvalue, channel);
   }
