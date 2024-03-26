@@ -83,7 +83,8 @@ enum COMMANDS_INDEXS : uint8_t
   LSB_INDEX,
   CHANNEL_A_INDEX,
   CHANNEL_B_INDEX,
-  OUTPUTS_INDEX,
+  OUTPUT_A_INDEX,
+  OUTPUT_B_INDEX,
   PROPERTIES_INDEX,
   MIN_A_INDEX,
   MAX_A_INDEX,
@@ -99,6 +100,7 @@ enum COMMANDS : uint8_t
   SEND_FIRMWARE_VERSION = 4, // Send the device firmware version
   SYNC_KNOBS = 5,            // Send active preset
   CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
+  START_SYSEX_MESSAGE = 7,   // Announce start of sysEx mesasge
   SET_THRU_MODE = 8,         // Set the midi THRU behavior
   END_OF_TRANSMISSION = 99   // Notify end of transmission
 };
