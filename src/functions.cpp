@@ -61,6 +61,29 @@ void updateKnob(const uint8_t &index)
     sendMidiMessage(index);
   }
 }
+void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t &min, uint8_t *value)
+{
+  if (bitRead(properties, invertIndex))
+  {
+    *value = max - (*value - min);
+  }
+}
+void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, uint8_t *outputValue, bool isLSB = false)
+{
+  // Define the total range based on the min and max settings
+  uint16_t totalRange = ((max - min + 1) << 7);
+
+  // Scale the 14-bit value to the defined total range
+  uint32_t scaledValue = ((uint32_t)value * totalRange) >> 14;
+  if (scaledValue > 16383)
+    scaledValue = 16383; // Cap the total range to 14-bit max if it exceeds
+
+  // Calculate the MSB or LSB from the scaled value
+  *outputValue = isLSB ? scaledValue & 0x7F : (scaledValue >> 7) & 0x7F; // Get the top 7 bits as MSB
+
+  // Adjust output based on the min to ensure it starts from the defined minimum
+  *outputValue += min;
+}
 
 void sendMidiMessage(const uint8_t &index)
 {
@@ -74,8 +97,10 @@ void sendMidiMessage(const uint8_t &index)
   const uint16_t prev_value_14bit = pot.getPreviousValue();
   uint8_t oldMSB = (prev_value_14bit >> 7) & 0x7F;
   uint8_t oldLSB = prev_value_14bit & 0x7F;
-  uint8_t MSB = (value_14bit >> 7) & 0x7F;
-  uint8_t LSB = value_14bit & 0x7F;
+  // uint8_t MSB = (value_14bit >> 7) & 0x7F;
+  // uint8_t LSB = value_14bit & 0x7F;
+  uint8_t MSB;
+  uint8_t LSB;
   uint8_t mode = extractMode(knob.PROPERTIES);
   midi::Channel channel_a =
       bitRead(knob.PROPERTIES, USE_OWN_CHANNEL_A_PROPERTY)
@@ -87,45 +112,26 @@ void sendMidiMessage(const uint8_t &index)
           : device.globalChannel;
   uint8_t macro_a_output = extractOutputs(knob.OUTPUTS, true);
   uint8_t macro_b_output = extractOutputs(knob.OUTPUTS, false);
+
   bool isMidiChanged = false;
 
-  MSB = map(MSB, 0, 127, knob.MIN_A, knob.MAX_A);
-  if (bitRead(knob.PROPERTIES, INVERT_A_PROPERTY))
-  {
-    MSB = map(MSB, 0, 127, knob.MAX_A, knob.MIN_A);
-  }
+  scaleValuesByRange(value_14bit, knob.MAX_A, knob.MIN_A, &MSB);
 
   if (extractMode(knob.PROPERTIES) == KNOB_MODE_HIRES)
   {
-    // Define the total range based on the knob's min and max settings
-    uint16_t totalRange = ((knob.MAX_A - knob.MIN_A + 1) << 7);
+    scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB, true);
+    invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &MSB);
 
-    // Scale the 14-bit value to the defined total range
-    uint32_t scaledValue = ((uint32_t)value_14bit * totalRange) >> 14;
-    if (scaledValue > 16383)
-      scaledValue = 16383; // Cap the total range to 14-bit max if it exceeds
-
-    // Calculate the MSB and LSB from the scaled value
-    MSB = (scaledValue >> 7) & 0x7F; // Get the top 7 bits as MSB
-    LSB = scaledValue & 0x7F;        // Get the bottom 7 bits as LSB
-
-    // Adjust MSB based on the knob's MIN_A to ensure it starts from the defined minimum
-    MSB += knob.MIN_A;
-
-    // Invert the values if required by the knob's properties
     if (bitRead(knob.PROPERTIES, INVERT_A_PROPERTY))
     {
-      MSB = knob.MAX_A - (MSB - knob.MIN_A);
       LSB = 127 - LSB;
     }
   }
   else
   {
-    LSB = map(MSB, 0, 127, knob.MIN_B, knob.MAX_B);
-    if (bitRead(knob.PROPERTIES, INVERT_B_PROPERTY))
-    {
-      LSB = map(MSB, 0, 127, knob.MAX_B, knob.MIN_B);
-    }
+    scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB);
+    invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &MSB);
+    invertValue(knob.PROPERTIES, INVERT_B_PROPERTY, knob.MAX_B, knob.MIN_B, &LSB);
   }
 
   switch (mode)
@@ -371,7 +377,7 @@ void doMidiRead()
 
 uint8_t extractMode(const uint8_t &properties)
 {
-  return (properties & B01110000) >> MODE_PROPERTY;
+  return (properties & B01110000) >> 4;
 }
 uint8_t extractChannel(const uint8_t &data, const bool &isMacroA)
 {

@@ -43,7 +43,7 @@ void formatFactory()
     defaultPreset.knobInfo[indexId].MAX_B = 127;
     defaultPreset.knobInfo[indexId].OUTPUTS = B00001111;
     defaultPreset.knobInfo[indexId].CHANNELS = B00000000;
-    defaultPreset.knobInfo[indexId].PROPERTIES = B00010000;
+    defaultPreset.knobInfo[indexId].PROPERTIES = B00100001;
   }
   defaultPreset.thruMode = THRU_OFF;
 

@@ -28,7 +28,7 @@ constexpr uint8_t threshold_idle_to_motion = 2;
 #endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 1, 0};
+const uint8_t firmwareVersion[] PROGMEM = {4, 5, 0};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
@@ -131,8 +131,7 @@ enum PROPERTIES : uint8_t
   INVERT_A_PROPERTY = 0,
   INVERT_B_PROPERTY = 1,
   USE_OWN_CHANNEL_A_PROPERTY = 2,
-  USE_OWN_CHANNEL_B_PROPERTY = 3,
-  MODE_PROPERTY = 4,
+  USE_OWN_CHANNEL_B_PROPERTY = 3
 };
 
 enum CHANNEL_NAMES : uint8_t

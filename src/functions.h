@@ -21,6 +21,8 @@ void onSerialMessage(const midi::Message<128> &);
 
 void updateKnob(const uint8_t &index);
 
+void invertValue(uint8_t, uint8_t, uint8_t *);
+void scaleValuesByRange(uint16_t, uint8_t &, uint8_t &, uint8_t *, bool);
 void sendMidiMessage(const uint8_t &index);
 void sendStandardCCMessage(uint8_t, uint8_t, uint8_t, midi::Channel);
 

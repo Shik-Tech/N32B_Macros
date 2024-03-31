@@ -46,10 +46,6 @@ void processSysex(unsigned char *data, unsigned int size)
             break;
         }
     }
-    else
-    {
-        // Serial.println("Manufacturer ID is not matching the N32B");
-    }
 }
 
 void handleChangeChannel(byte channel)
