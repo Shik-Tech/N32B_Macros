@@ -95,10 +95,8 @@ void sendMidiMessage(const uint8_t &index)
 
   const uint16_t value_14bit = pot.getCurrentValue();
   const uint16_t prev_value_14bit = pot.getPreviousValue();
-  uint8_t oldMSB = (prev_value_14bit >> 7) & 0x7F;
-  uint8_t oldLSB = prev_value_14bit & 0x7F;
-  // uint8_t MSB = (value_14bit >> 7) & 0x7F;
-  // uint8_t LSB = value_14bit & 0x7F;
+  uint8_t oldMSB;
+  uint8_t oldLSB;
   uint8_t MSB;
   uint8_t LSB;
   uint8_t mode = extractMode(knob.PROPERTIES);
@@ -116,22 +114,29 @@ void sendMidiMessage(const uint8_t &index)
   bool isMidiChanged = false;
 
   scaleValuesByRange(value_14bit, knob.MAX_A, knob.MIN_A, &MSB);
+  scaleValuesByRange(prev_value_14bit, knob.MAX_A, knob.MIN_A, &oldMSB);
 
   if (extractMode(knob.PROPERTIES) == KNOB_MODE_HIRES)
   {
     scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB, true);
+    scaleValuesByRange(prev_value_14bit, knob.MAX_B, knob.MIN_B, &oldLSB, true);
     invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &MSB);
+    invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &oldMSB);
 
     if (bitRead(knob.PROPERTIES, INVERT_A_PROPERTY))
     {
       LSB = 127 - LSB;
+      oldLSB = 127 - oldLSB;
     }
   }
   else
   {
     scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB);
+    scaleValuesByRange(prev_value_14bit, knob.MAX_B, knob.MIN_B, &oldLSB);
     invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &MSB);
     invertValue(knob.PROPERTIES, INVERT_B_PROPERTY, knob.MAX_B, knob.MIN_B, &LSB);
+    invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &oldMSB);
+    invertValue(knob.PROPERTIES, INVERT_B_PROPERTY, knob.MAX_B, knob.MIN_B, &oldLSB);
   }
 
   switch (mode)
@@ -158,8 +163,11 @@ void sendMidiMessage(const uint8_t &index)
     if (oldMSB != MSB)
     {
       sendStandardCCMessage(macro_a_output, knob.MSB, MSB, channel_a);
+      isMidiChanged = true;
+    }
+    if (oldLSB != LSB)
+    {
       sendStandardCCMessage(macro_b_output, knob.LSB, LSB, channel_b);
-
       isMidiChanged = true;
     }
     break;
