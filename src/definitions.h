@@ -5,10 +5,6 @@
   Copyright (c) 2024 SHIK
 */
 
-/*
- * Definitions of constats
- */
-
 #ifndef N32B_DEFINITIONS
 #define N32B_DEFINITIONS
 

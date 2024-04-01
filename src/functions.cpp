@@ -7,7 +7,7 @@
 
 #include "functions.h"
 
-void onUsbMessage(const midi::Message<128> &message)
+void onUsbMessage(midi::Message<128> &message)
 {
   if (message.type != ActiveSensing)
   {
@@ -30,7 +30,7 @@ void onUsbMessage(const midi::Message<128> &message)
   }
 }
 
-void onSerialMessage(const midi::Message<128> &message)
+void onSerialMessage(midi::Message<128> &message)
 {
   if (message.type != ActiveSensing)
   {
@@ -53,7 +53,7 @@ void onSerialMessage(const midi::Message<128> &message)
   }
 }
 
-void updateKnob(const uint8_t &index)
+void updateKnob(uint8_t &index)
 {
   Pot &pot = device.pots[index];
   if (pot.getState() == Pot_t::IN_MOTION)
@@ -61,14 +61,14 @@ void updateKnob(const uint8_t &index)
     sendMidiMessage(index);
   }
 }
-void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t &min, uint8_t *value)
+void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t &min, midi::DataByte *value)
 {
   if (bitRead(properties, invertIndex))
   {
     *value = max - (*value - min);
   }
 }
-void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, uint8_t *outputValue, bool isLSB = false)
+void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataByte *outputValue, bool isLSB = false)
 {
   // Define the total range based on the min and max settings
   uint16_t totalRange = ((max - min + 1) << 7);
@@ -85,7 +85,7 @@ void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, uint8_t *out
   *outputValue += min;
 }
 
-void sendMidiMessage(const uint8_t &index)
+void sendMidiMessage(uint8_t &index)
 {
   // if (isStartup)
   //       return;
@@ -93,30 +93,27 @@ void sendMidiMessage(const uint8_t &index)
   Knob_t &knob = device.activePreset.knobInfo[index];
   Pot &pot = device.pots[index];
 
-  const uint16_t value_14bit = pot.getCurrentValue();
-  const uint16_t prev_value_14bit = pot.getPreviousValue();
+  uint16_t value_14bit = pot.getCurrentValue();
+  uint16_t prev_value_14bit = pot.getPreviousValue();
   uint8_t oldMSB;
   uint8_t oldLSB;
   uint8_t MSB;
   uint8_t LSB;
-  uint8_t mode = extractMode(knob.PROPERTIES);
-  midi::Channel channel_a =
-      bitRead(knob.PROPERTIES, USE_OWN_CHANNEL_A_PROPERTY)
-          ? extractChannel(knob.CHANNELS, CHANNEL_A)
-          : device.globalChannel;
-  midi::Channel channel_b =
-      bitRead(knob.PROPERTIES, USE_OWN_CHANNEL_B_PROPERTY)
-          ? extractChannel(knob.CHANNELS, CHANNEL_B)
-          : device.globalChannel;
-  uint8_t macro_a_output = extractOutputs(knob.OUTPUTS, true);
-  uint8_t macro_b_output = extractOutputs(knob.OUTPUTS, false);
+  uint8_t mode;
+  midi::Channel channel_a;
+  midi::Channel channel_b;
+  uint8_t macro_a_output;
+  uint8_t macro_b_output;
 
   bool isMidiChanged = false;
 
+  extractMode(knob.PROPERTIES, &mode);
+  extractChannels(knob.CHANNELS, knob.PROPERTIES, &channel_a, &channel_b);
+  extractOutputs(knob.OUTPUTS, &macro_a_output, &macro_b_output);
   scaleValuesByRange(value_14bit, knob.MAX_A, knob.MIN_A, &MSB);
   scaleValuesByRange(prev_value_14bit, knob.MAX_A, knob.MIN_A, &oldMSB);
 
-  if (extractMode(knob.PROPERTIES) == KNOB_MODE_HIRES)
+  if (mode == KNOB_MODE_HIRES)
   {
     scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB, true);
     scaleValuesByRange(prev_value_14bit, knob.MAX_B, knob.MIN_B, &oldLSB, true);
@@ -178,17 +175,12 @@ void sendMidiMessage(const uint8_t &index)
       if (macro_a_output == OUTPUT_TRS ||
           macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreSerial.beginNrpn(knob.MSB << 7 | knob.LSB, channel_a);
-        MIDICoreSerial.sendNrpnValue(MSB, LSB, channel_a);
-        MIDICoreSerial.endNrpn(channel_a);
+        sendNrpnMidiMessage(MIDICoreSerial, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       if (macro_a_output == OUTPUT_USB ||
           macro_a_output == OUTPUT_BOTH)
       {
-
-        MIDICoreUSB.beginNrpn(knob.MSB << 7 | knob.LSB, channel_a);
-        MIDICoreUSB.sendNrpnValue(MSB, LSB, channel_a);
-        MIDICoreUSB.endNrpn(channel_a);
+        sendNrpnMidiMessage(MIDICoreUSB, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       isMidiChanged = true;
     }
@@ -199,15 +191,11 @@ void sendMidiMessage(const uint8_t &index)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreSerial.beginRpn(knob.MSB << 7 | knob.LSB, channel_a);
-        MIDICoreSerial.sendRpnValue(MSB, LSB, channel_a);
-        MIDICoreSerial.endRpn(channel_a);
+        sendRpnMidiMessage(MIDICoreSerial, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       if (macro_a_output == OUTPUT_USB || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreUSB.beginRpn(knob.MSB << 7 | knob.LSB, channel_a);
-        MIDICoreUSB.sendRpnValue(MSB, LSB, channel_a);
-        MIDICoreUSB.endRpn(channel_a);
+        sendRpnMidiMessage(MIDICoreUSB, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       isMidiChanged = true;
     }
@@ -271,6 +259,22 @@ void sendMidiMessage(const uint8_t &index)
   pot.setPreviousValue();
 }
 
+template <typename Transport>
+void sendNrpnMidiMessage(midi::MidiInterface<Transport> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel)
+{
+  MidiInterface.beginNrpn(msbNumber << 7 | lsbNumber, channel);
+  MidiInterface.sendNrpnValue(MSB, LSB, channel);
+  MidiInterface.endNrpn(channel);
+}
+
+template <typename Transport>
+void sendRpnMidiMessage(midi::MidiInterface<Transport> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel)
+{
+  MidiInterface.beginRpn(msbNumber << 7 | lsbNumber, channel);
+  MidiInterface.sendRpnValue(MSB, LSB, channel);
+  MidiInterface.endRpn(channel);
+}
+
 void sendStandardCCMessage(uint8_t output, uint8_t message, uint8_t value, midi::Channel channel)
 {
   if (output == OUTPUT_TRS || output == OUTPUT_BOTH)
@@ -285,16 +289,8 @@ void sendStandardCCMessage(uint8_t output, uint8_t message, uint8_t value, midi:
 
 void changeChannel(bool direction)
 {
-  if (direction)
-  {
-    // Next Channel
-    device.globalChannel = (device.globalChannel % 16) + 1;
-  }
-  else
-  {
-    // Previous Channel
-    device.globalChannel = (device.globalChannel - 2 + 16) % 16 + 1;
-  }
+  device.globalChannel = direction ? (device.globalChannel % 16) + 1 : (device.globalChannel - 2 + 16) % 16 + 1;
+
   n32b_display.showChannelNumber(device.globalChannel);
 }
 
@@ -318,7 +314,7 @@ void changePreset(bool direction)
   }
 }
 
-void buttonReleaseAction(const bool &direction)
+void buttonReleaseAction(bool direction)
 {
   direction ? isPressingAButton = false : isPressingBButton = false;
 
@@ -326,7 +322,7 @@ void buttonReleaseAction(const bool &direction)
     device.isPresetMode ? changePreset(direction) : changeChannel(direction);
 }
 
-void buttonPressAction(const bool &direction)
+void buttonPressAction(bool direction)
 {
   pressedTime = millis();
 }
@@ -383,15 +379,23 @@ void doMidiRead()
   MIDICoreUSB.read();
 }
 
-uint8_t extractMode(const uint8_t &properties)
+void extractMode(uint8_t properties, uint8_t *mode)
 {
-  return (properties & B01110000) >> 4;
+  *mode = (properties & B01110000) >> 4;
 }
-uint8_t extractChannel(const uint8_t &data, const bool &isMacroA)
+void extractChannels(uint8_t data, uint8_t properties, midi::Channel *channel_a, midi::Channel *channel_b)
 {
-  return (isMacroA ? (data & 0xF0) >> 4 : data & 0xF) + 1;
+  *channel_a =
+      bitRead(properties, USE_OWN_CHANNEL_A_PROPERTY)
+          ? ((data & 0xF0) >> 4) + 1
+          : device.globalChannel;
+  *channel_b =
+      bitRead(properties, USE_OWN_CHANNEL_B_PROPERTY)
+          ? (data & 0xF) + 1
+          : device.globalChannel;
 }
-uint8_t extractOutputs(const uint8_t &outputs, const bool &isMacroA)
+void extractOutputs(uint8_t outputs, uint8_t *output_a, uint8_t *output_b)
 {
-  return isMacroA ? (outputs & 0xC) >> 2 : outputs & 0x3;
+  *output_a = (outputs & 0xC) >> 2;
+  *output_b = outputs & 0x3;
 }

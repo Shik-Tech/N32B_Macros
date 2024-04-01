@@ -16,26 +16,33 @@
 
 USING_NAMESPACE_MIDI;
 
-void onUsbMessage(const midi::Message<128> &);
-void onSerialMessage(const midi::Message<128> &);
+void onUsbMessage(midi::Message<128> &);
+void onSerialMessage(midi::Message<128> &);
 
-void updateKnob(const uint8_t &index);
+void updateKnob(uint8_t &index);
 
-void invertValue(uint8_t, uint8_t, uint8_t *);
-void scaleValuesByRange(uint16_t, uint8_t &, uint8_t &, uint8_t *, bool);
-void sendMidiMessage(const uint8_t &index);
+void invertValue(uint8_t, uint8_t, midi::DataByte *);
+void scaleValuesByRange(uint16_t, uint8_t &, uint8_t &, midi::DataByte *, bool);
+void sendMidiMessage(uint8_t &index);
+
+template <typename Transport>
+void sendNrpnMidiMessage(midi::MidiInterface<Transport> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel);
+
+template <typename Transport>
+void sendRpnMidiMessage(midi::MidiInterface<Transport> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel);
+
 void sendStandardCCMessage(uint8_t, uint8_t, uint8_t, midi::Channel);
 
 void changeChannel(bool);
 void changePreset(bool);
 
-void buttonReleaseAction(const bool &);
-void buttonPressAction(const bool &);
+void buttonReleaseAction(bool);
+void buttonPressAction(bool);
 void renderButtonFunctions();
 
 void doMidiRead();
-uint8_t extractMode(const uint8_t &);
-uint8_t extractChannel(const uint8_t &, const bool &);
-uint8_t extractOutputs(const uint8_t &, const bool &);
+void extractMode(uint8_t properties, uint8_t *mode);
+void extractChannels(uint8_t data, uint8_t properties, midi::Channel *channel_a, midi::Channel *channel_b);
+void extractOutputs(uint8_t outputs, uint8_t *output_a, uint8_t *output_b);
 
 #endif
