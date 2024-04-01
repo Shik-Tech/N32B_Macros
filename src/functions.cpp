@@ -7,7 +7,7 @@
 
 #include "functions.h"
 
-void onUsbMessage(midi::Message<128> &message)
+void onUsbMessage(const midi::Message<128> &message)
 {
   if (message.type != ActiveSensing)
   {
@@ -30,7 +30,7 @@ void onUsbMessage(midi::Message<128> &message)
   }
 }
 
-void onSerialMessage(midi::Message<128> &message)
+void onSerialMessage(const midi::Message<128> &message)
 {
   if (message.type != ActiveSensing)
   {

@@ -16,8 +16,8 @@
 
 USING_NAMESPACE_MIDI;
 
-void onUsbMessage(midi::Message<128> &);
-void onSerialMessage(midi::Message<128> &);
+void onUsbMessage(const midi::Message<128> &);
+void onSerialMessage(const midi::Message<128> &);
 
 void updateKnob(uint8_t &index);
 
