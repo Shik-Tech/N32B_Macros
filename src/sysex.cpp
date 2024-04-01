@@ -86,7 +86,9 @@ void sendActivePreset()
         uint8_t channel_b = device.activePreset.knobInfo[i].CHANNELS & 0xF;
         uint8_t output_a = device.activePreset.knobInfo[i].OUTPUTS >> 2;
         uint8_t output_b = device.activePreset.knobInfo[i].OUTPUTS & 0x3;
-        uint8_t knobsData[14] = {
+        uint8_t properties = device.activePreset.knobInfo[i].PROPERTIES & 0xF;
+        uint8_t mode = device.activePreset.knobInfo[i].PROPERTIES >> 4;
+        uint8_t knobsData[15] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
             i,
@@ -96,19 +98,22 @@ void sendActivePreset()
             channel_b,
             output_a,
             output_b,
-            device.activePreset.knobInfo[i].PROPERTIES,
             device.activePreset.knobInfo[i].MIN_A,
             device.activePreset.knobInfo[i].MAX_A,
             device.activePreset.knobInfo[i].MIN_B,
-            device.activePreset.knobInfo[i].MAX_B};
-        MIDICoreUSB.sendSysEx(14, knobsData);
+            device.activePreset.knobInfo[i].MAX_B,
+            properties,
+            mode};
+        MIDICoreUSB.sendSysEx(15, knobsData);
 #else
         uint8_t indexId = pgm_read_word_near(knobsLocation + i);
         uint8_t channel_a = device.activePreset.knobInfo[indexId].CHANNELS >> 4;
         uint8_t channel_b = device.activePreset.knobInfo[indexId].CHANNELS & 0xF;
         uint8_t output_a = device.activePreset.knobInfo[indexId].OUTPUTS >> 2;
         uint8_t output_b = device.activePreset.knobInfo[indexId].OUTPUTS & 0x3;
-        uint8_t knobsData[14] = {
+        uint8_t properties = device.activePreset.knobInfo[indexId].PROPERTIES & 0xF;
+        uint8_t mode = device.activePreset.knobInfo[indexId].PROPERTIES & 0xF0;
+        uint8_t knobsData[15] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
             pgm_read_word_near(knobsLocation + i),
@@ -118,12 +123,13 @@ void sendActivePreset()
             channel_b,
             output_a,
             output_b,
-            device.activePreset.knobInfo[indexId].PROPERTIES,
             device.activePreset.knobInfo[indexId].MIN_A,
             device.activePreset.knobInfo[indexId].MAX_A,
             device.activePreset.knobInfo[indexId].MIN_B,
-            device.activePreset.knobInfo[indexId].MAX_B};
-        MIDICoreUSB.sendSysEx(14, knobsData);
+            device.activePreset.knobInfo[indexId].MAX_B,
+            properties,
+            mode};
+        MIDICoreUSB.sendSysEx(15, knobsData);
 #endif
     }
 
