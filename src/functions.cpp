@@ -381,7 +381,7 @@ void doMidiRead()
 
 void extractMode(uint8_t properties, uint8_t *mode)
 {
-  *mode = (properties & B01110000) >> 4;
+  *mode = (properties & B11110000) >> 4;
 }
 void extractChannels(uint8_t data, uint8_t properties, midi::Channel *channel_a, midi::Channel *channel_b)
 {

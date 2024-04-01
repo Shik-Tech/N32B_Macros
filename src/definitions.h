@@ -81,11 +81,12 @@ enum COMMANDS_INDEXS : uint8_t
   CHANNEL_B_INDEX,
   OUTPUT_A_INDEX,
   OUTPUT_B_INDEX,
-  PROPERTIES_INDEX,
   MIN_A_INDEX,
   MAX_A_INDEX,
   MIN_B_INDEX,
-  MAX_B_INDEX
+  MAX_B_INDEX,
+  PROPERTIES_INDEX,
+  KNOB_MODE_INDEX
 };
 
 enum COMMANDS : uint8_t
@@ -174,7 +175,7 @@ struct Knob_t
   // 3 - Use own channel A
   // 4 - Use own channel B
 
-  // Knob mode is defined with 3 bits and need to be shifted to the right to calculate it's value:
+  // Knob mode is defined with 4 bits and need to be shifted to the right to calculate it's value:
   // 5-8 - Mode value
 };
 

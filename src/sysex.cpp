@@ -22,7 +22,7 @@ void processSysex(unsigned char *data, unsigned int size)
             device.activePreset.knobInfo[data[KNOB_INDEX]].MAX_B = data[MAX_B_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = (data[CHANNEL_A_INDEX] << 4) | data[CHANNEL_B_INDEX];
             device.activePreset.knobInfo[data[KNOB_INDEX]].OUTPUTS = (data[OUTPUT_A_INDEX] << 2) | data[OUTPUT_B_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].PROPERTIES = data[PROPERTIES_INDEX];
+            device.activePreset.knobInfo[data[KNOB_INDEX]].PROPERTIES = (data[KNOB_MODE_INDEX] << 4) | data[PROPERTIES_INDEX];
             break;
         case SET_THRU_MODE:
             setMidiThruMode(data[KNOB_INDEX]);
