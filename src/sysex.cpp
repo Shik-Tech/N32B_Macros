@@ -112,7 +112,7 @@ void sendActivePreset()
         uint8_t output_a = device.activePreset.knobInfo[indexId].OUTPUTS >> 2;
         uint8_t output_b = device.activePreset.knobInfo[indexId].OUTPUTS & 0x3;
         uint8_t properties = device.activePreset.knobInfo[indexId].PROPERTIES & 0xF;
-        uint8_t mode = device.activePreset.knobInfo[indexId].PROPERTIES & 0xF0;
+        uint8_t mode = device.activePreset.knobInfo[indexId].PROPERTIES >> 4;
         uint8_t knobsData[15] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
