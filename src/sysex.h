@@ -21,6 +21,5 @@ void handleProgramChange(byte, byte);
 void sendDeviceFirmwareVersion();
 void sendActivePreset();
 void setMidiThruMode(byte);
-void setMidiOutputMode(byte);
 
 #endif
