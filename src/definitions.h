@@ -24,7 +24,7 @@ constexpr uint8_t threshold_idle_to_motion = 2;
 #endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 5, 0};
+const uint8_t firmwareVersion[] PROGMEM = {4, 5, 1};
 
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
