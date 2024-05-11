@@ -115,8 +115,8 @@ void sendMidiMessage(uint8_t &index)
 
   if (mode == KNOB_MODE_HIRES)
   {
-    scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB, true);
-    scaleValuesByRange(prev_value_14bit, knob.MAX_B, knob.MIN_B, &oldLSB, true);
+    scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB, true); // TODO: check if this should be MAX_A, MIN_B instead!
+    scaleValuesByRange(prev_value_14bit, knob.MAX_B, knob.MIN_B, &oldLSB, true); // TODO: check if this should be MAX_A, MIN_B instead!
     invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &MSB);
     invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &oldMSB);
 
