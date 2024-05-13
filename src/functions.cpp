@@ -71,18 +71,26 @@ void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t 
 void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataByte *outputValue, bool isLSB = false)
 {
   // Define the total range based on the min and max settings
-  uint16_t totalRange = ((max - min + 1) << 7);
+  uint16_t range = max - min + 1;
+  uint16_t totalRange = range << 7; // 128 steps for each unit in range
 
   // Scale the 14-bit value to the defined total range
   uint32_t scaledValue = ((uint32_t)value * totalRange) >> 14;
+
+  // Cap the total range to 14-bit max if it exceeds
   if (scaledValue > 16383)
-    scaledValue = 16383; // Cap the total range to 14-bit max if it exceeds
+    scaledValue = 16383;
 
   // Calculate the MSB or LSB from the scaled value
-  *outputValue = isLSB ? scaledValue & 0x7F : (scaledValue >> 7) & 0x7F; // Get the top 7 bits as MSB
-
-  // Adjust output based on the min to ensure it starts from the defined minimum
-  *outputValue += min;
+  if (isLSB)
+  {
+    *outputValue = scaledValue & 0x7F; // LSB ranges from 0-127 within each MSB step
+  }
+  else
+  {
+    *outputValue = (scaledValue >> 7) & 0x7F; // Get the top 7 bits as MSB
+    *outputValue += min;                      // Adjust the MSB to start from the defined minimum
+  }
 }
 
 void sendMidiMessage(uint8_t &index)
@@ -115,8 +123,8 @@ void sendMidiMessage(uint8_t &index)
 
   if (mode == KNOB_MODE_HIRES)
   {
-    scaleValuesByRange(value_14bit, knob.MAX_B, knob.MIN_B, &LSB, true); // TODO: check if this should be MAX_A, MIN_B instead!
-    scaleValuesByRange(prev_value_14bit, knob.MAX_B, knob.MIN_B, &oldLSB, true); // TODO: check if this should be MAX_A, MIN_B instead!
+    scaleValuesByRange(value_14bit, knob.MAX_A, knob.MIN_A, &LSB, true);
+    scaleValuesByRange(prev_value_14bit, knob.MAX_A, knob.MIN_A, &oldLSB, true);
     invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &MSB);
     invertValue(knob.PROPERTIES, INVERT_A_PROPERTY, knob.MAX_A, knob.MIN_A, &oldMSB);
 
