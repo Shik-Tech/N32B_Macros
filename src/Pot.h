@@ -2,7 +2,7 @@
 #define POT_h
 
 #include <Arduino.h>
-#include "definitions.h"
+// #include "definitions.h"
 
 struct Pot_t
 {

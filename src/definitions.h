@@ -9,13 +9,9 @@
 #define N32B_DEFINITIONS
 
 #include <Arduino.h>
-#include <vector>
 #include <USB-MIDI.h>
-#include <ezButton.h>
+#include <vector>
 #include <Pot.h>
-#include <display.h>
-
-USING_NAMESPACE_MIDI;
 
 #ifndef N32Bv3
 constexpr uint8_t threshold_idle_to_motion = 4;
@@ -24,15 +20,15 @@ constexpr uint8_t threshold_idle_to_motion = 2;
 #endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 5, 2};
+const uint8_t firmwareVersion[] PROGMEM = {4, 5, 3};
 
-extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
-extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
-extern N32B_DISPLAY n32b_display;
-extern ezButton buttonA;
-extern ezButton buttonB;
+#define LONG_PRESS_THRESHOLD 1000
+#define reset_timeout 4000 // Reset to factory preset timeout
 
-/* Pin setup */
+// byte index in EEPROM for the last used preset
+#define lastUsedPresetAddress 0
+
+// Pin setup
 #ifdef N32Bv3
 enum PinIndices : uint8_t
 {
@@ -69,6 +65,21 @@ enum PinIndices : uint8_t
   BUTTON_B_PIN = A2
 };
 #endif
+
+// Button Modes
+enum Mode
+{
+  CHANNEL_SELECT,
+  PRESET_SELECT
+};
+
+// Button States
+enum ButtonState
+{
+  BUTTON_IDLE,
+  BUTTON_PRESSED,
+  BUTTON_LONG_PRESSED
+};
 
 enum COMMANDS_INDEXS : uint8_t
 {
@@ -193,20 +204,11 @@ struct Device_t
   Pot pots[NUMBER_OF_KNOBS];
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
-  bool isPresetMode{false};
+  Mode currentMode = CHANNEL_SELECT;
+  ButtonState buttonAState = BUTTON_IDLE;
+  ButtonState buttonBState = BUTTON_IDLE;
+  unsigned long buttonAPressTime = 0;
+  unsigned long buttonBPressTime = 0;
 };
-
-/* Device setup data */
-extern Device_t device;
-
-/* Buttons variables */
-extern const unsigned int reset_timeout; // Reset to factory preset timeout
-extern const uint8_t SHORT_PRESS_TIME;   // Milliseconds
-extern unsigned long pressedTime;
-extern bool isPressingAButton;
-extern bool isPressingBButton;
-
-// byte index in EEPROM for the last used preset
-extern uint8_t lastUsedPresetAddress;
 
 #endif

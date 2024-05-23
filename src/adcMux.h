@@ -10,7 +10,8 @@
 
 #include <Arduino.h>
 #include "definitions.h"
-#include "functions.h"
+#include "pot.h"
+// #include "functions.h"
 
 class ADC_MUX
 {

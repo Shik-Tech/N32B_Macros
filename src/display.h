@@ -39,6 +39,7 @@ public:
   void showStartUpAnimation();
   void factoryResetAnimation();
   void showSaveMessage();
+  void showSynching();
 
 private:
   unsigned long displayOffTimer;

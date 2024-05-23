@@ -64,8 +64,6 @@ void ADC_MUX::update(const uint8_t &index)
             pot.resetReleaseCounter();
         }
     }
-    // pot.setPreviousValue();
-    // pot.setPreviousThresholdValue(currentThresholdValue);
 }
 
 uint8_t ADC_MUX::pinSelector(const uint8_t &index)

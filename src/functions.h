@@ -11,8 +11,9 @@
 #include <Arduino.h>
 #include <USB-MIDI.h>
 
-#include "definitions.h"
+// #include "definitions.h"
 #include "storage.h"
+#include "devices.h"
 
 USING_NAMESPACE_MIDI;
 
@@ -36,13 +37,18 @@ void sendStandardCCMessage(uint8_t, uint8_t, uint8_t, midi::Channel);
 void changeChannel(bool);
 void changePreset(bool);
 
-void buttonReleaseAction(bool);
-void buttonPressAction(bool);
-void renderButtonFunctions();
+// void buttonReleaseAction(bool);
+// void buttonPressAction(bool);
+// void renderButtonFunctions();
 
 void doMidiRead();
 void extractMode(uint8_t properties, uint8_t *mode);
 void extractChannels(uint8_t data, uint8_t properties, midi::Channel *channel_a, midi::Channel *channel_b);
 void extractOutputs(uint8_t outputs, uint8_t *output_a, uint8_t *output_b);
+
+void handleButtons();
+void changeChannel(bool direction);
+void changePreset(bool direction);
+void sendCurrentPreset();
 
 #endif

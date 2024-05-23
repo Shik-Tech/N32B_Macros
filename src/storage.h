@@ -11,7 +11,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-#include "definitions.h"
+#include "devices.h"
 
 bool isEEPROMvalid();
 void formatFactory();
