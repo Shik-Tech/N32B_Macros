@@ -53,14 +53,15 @@ void onSerialMessage(const midi::Message<128> &message)
   }
 }
 
-void updateKnob(uint8_t &index)
+void updateKnob(uint8_t &index, bool force = false)
 {
   Pot &pot = device.pots[index];
   if (pot.getState() == Pot_t::IN_MOTION)
   {
-    sendMidiMessage(index);
+    sendMidiMessage(index, force);
   }
 }
+
 void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t &min, midi::DataByte *value)
 {
   if (bitRead(properties, invertIndex))
@@ -93,11 +94,8 @@ void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataBy
   }
 }
 
-void sendMidiMessage(uint8_t &index)
+void sendMidiMessage(uint8_t &index, bool force = false)
 {
-  // if (isStartup)
-  //       return;
-
   Knob_t &knob = device.activePreset.knobInfo[index];
   Pot &pot = device.pots[index];
 
@@ -147,7 +145,7 @@ void sendMidiMessage(uint8_t &index)
   switch (mode)
   {
   case KNOB_MODE_STANDARD:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       sendStandardCCMessage(macro_a_output, knob.MSB, MSB, channel_a);
       isMidiChanged = true;
@@ -155,7 +153,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_HIRES:
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       sendStandardCCMessage(macro_a_output, knob.MSB, MSB, channel_a);
       sendStandardCCMessage(macro_a_output, knob.LSB, LSB, channel_a);
@@ -165,12 +163,12 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_MACRO:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       sendStandardCCMessage(macro_a_output, knob.MSB, MSB, channel_a);
       isMidiChanged = true;
     }
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       sendStandardCCMessage(macro_b_output, knob.LSB, LSB, channel_b);
       isMidiChanged = true;
@@ -178,7 +176,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_NRPN:
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       if (macro_a_output == OUTPUT_TRS ||
           macro_a_output == OUTPUT_BOTH)
@@ -195,7 +193,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_RPN:
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -210,7 +208,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_PROGRAM_CHANGE:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -226,7 +224,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_POLY_AFTER_TOUCH:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -240,7 +238,7 @@ void sendMidiMessage(uint8_t &index)
     }
     break;
   case KNOB_MODE_MONO_AFTER_TOUCH:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -326,12 +324,12 @@ void sendCurrentPreset()
 {
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
-    muxFactory.update(currentKnob);
+    muxFactory.update(currentKnob, true);
   }
 
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
-    updateKnob(currentKnob);
+    updateKnob(currentKnob, true);
   }
 }
 

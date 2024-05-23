@@ -342,8 +342,8 @@ void N32B_DISPLAY::showSynching()
     clear();
 
     setDigit(2, MAX7219DIGIT(B01011011));
-    setDigit(1, MAX7219DIGIT(B00011100));
-    setDigit(0, MAX7219DIGIT(B00011001));
+    setDigit(1, MAX7219DIGIT(B00010101));
+    setDigit(0, MAX7219DIGIT(B00001101));
     flush();
     delay(1000);
 
