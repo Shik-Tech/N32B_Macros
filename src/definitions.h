@@ -107,8 +107,9 @@ enum COMMANDS : uint8_t
   SEND_FIRMWARE_VERSION = 4, // Send the device firmware version
   SYNC_KNOBS = 5,            // Send active preset
   CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
-  START_SYSEX_MESSAGE = 7,   // Announce start of sysEx mesasge
+  // START_SYSEX_MESSAGE = 7,   // Announce start of sysEx mesasge
   SET_THRU_MODE = 8,         // Set the midi THRU behavior
+  SEND_SNAPSHOT = 9,         // Set the midi THRU behavior
   END_OF_TRANSMISSION = 99   // Notify end of transmission
 };
 
@@ -180,13 +181,13 @@ struct Knob_t
   uint8_t PROPERTIES;
   // Using PROPERTIES to reduce storage size.
   // Bits are used as boolean values for inverts and use own channel:
-  // 1 - Invert A
+  // 0 - Invert A
   // 2 - Invert B
   // 3 - Use own channel A
   // 4 - Use own channel B
 
   // Knob mode is defined with 4 bits and need to be shifted to the right to calculate it's value:
-  // 5-8 - Mode value
+  // 4-7 - Mode value
 };
 
 // A preset struct is defining the device preset structure
