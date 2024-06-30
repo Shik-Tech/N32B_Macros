@@ -355,7 +355,6 @@ void handleButtons()
       {
         device.currentMode = CHANNEL_SELECT;
         n32b_display.showChannelNumber(device.globalChannel);
-        Serial.println("Switched to CHANNEL_SELECT mode");
       }
     }
   }
