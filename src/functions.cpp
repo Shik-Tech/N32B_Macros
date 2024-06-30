@@ -320,7 +320,7 @@ void changePreset(bool direction)
   }
 }
 
-void sendCurrentPreset()
+void sendSnapshot()
 {
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
@@ -394,7 +394,7 @@ void handleButtons()
       else if (device.currentMode == PRESET_SELECT)
       {
         n32b_display.showSynching();
-        sendCurrentPreset();
+        sendSnapshot();
       }
     }
   }

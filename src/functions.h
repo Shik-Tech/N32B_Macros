@@ -49,6 +49,6 @@ void extractOutputs(uint8_t outputs, uint8_t *output_a, uint8_t *output_b);
 void handleButtons();
 void changeChannel(bool direction);
 void changePreset(bool direction);
-void sendCurrentPreset();
+void sendSnapshot();
 
 #endif
