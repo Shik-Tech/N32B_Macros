@@ -5,8 +5,7 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef N32B_DEVICES
-#define N32B_DEVICES
+#pragma once
 
 #include <Arduino.h>
 #include <USB-MIDI.h>
@@ -23,5 +22,3 @@ extern ADC_MUX muxFactory;
 extern N32B_DISPLAY n32b_display;
 extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
 extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
-
-#endif

@@ -5,13 +5,11 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef ADC_MUX_h
-#define ADC_MUX_h
+#pragma once
 
 #include <Arduino.h>
 #include "definitions.h"
 #include "pot.h"
-// #include "functions.h"
 
 class ADC_MUX
 {
@@ -30,5 +28,3 @@ private:
 
   static inline uint16_t FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t nAlphaShift);
 };
-
-#endif

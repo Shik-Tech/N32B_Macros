@@ -5,8 +5,7 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef FUNCTIONS_h
-#define FUNCTIONS_h
+#pragma once
 
 #include <Arduino.h>
 #include <USB-MIDI.h>
@@ -50,5 +49,3 @@ void handleButtons();
 void changeChannel(bool direction);
 void changePreset(bool direction);
 void sendSnapshot();
-
-#endif

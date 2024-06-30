@@ -1,5 +1,11 @@
-#ifndef POT_h
-#define POT_h
+/*
+  N32B Macros Firmware v4.x.x
+  MIT License
+
+  Copyright (c) 2024 SHIK
+*/
+
+#pragma once
 
 #include <Arduino.h>
 // #include "definitions.h"
@@ -42,5 +48,3 @@ public:
 private:
     Pot_t potData;
 };
-
-#endif

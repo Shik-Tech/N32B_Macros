@@ -5,8 +5,7 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef N32B_DEFINITIONS
-#define N32B_DEFINITIONS
+#pragma once
 
 #include <Arduino.h>
 #include <USB-MIDI.h>
@@ -210,5 +209,3 @@ struct Device_t
   unsigned long buttonAPressTime = 0;
   unsigned long buttonBPressTime = 0;
 };
-
-#endif
