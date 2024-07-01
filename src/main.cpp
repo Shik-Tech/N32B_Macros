@@ -83,7 +83,7 @@ void setup()
   MIDICoreSerial.setHandleMessage(onSerialMessage);
 
   MIDICoreUSB.setHandleSystemExclusive(processSysex);
-  // MIDICoreSerial.setHandleSystemExclusive(processSysex);
+  MIDICoreSerial.setHandleSystemExclusive(processSysex);
 
   MIDICoreUSB.setHandleProgramChange(handleProgramChange);
   MIDICoreSerial.setHandleProgramChange(handleProgramChange);

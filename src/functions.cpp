@@ -322,6 +322,7 @@ void changePreset(bool direction)
 
 void sendSnapshot()
 {
+  n32b_display.showSynching();
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
     muxFactory.update(currentKnob, true);
@@ -393,7 +394,6 @@ void handleButtons()
       }
       else if (device.currentMode == PRESET_SELECT)
       {
-        n32b_display.showSynching();
         sendSnapshot();
       }
     }
