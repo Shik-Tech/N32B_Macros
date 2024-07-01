@@ -5,8 +5,7 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef SYSEX_h
-#define SYSEX_h
+#pragma once
 
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -21,5 +20,3 @@ void handleProgramChange(byte, byte);
 void sendDeviceFirmwareVersion();
 void sendActivePreset();
 void setMidiThruMode(byte);
-
-#endif

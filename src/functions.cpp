@@ -53,14 +53,15 @@ void onSerialMessage(const midi::Message<128> &message)
   }
 }
 
-void updateKnob(uint8_t &index)
+void updateKnob(uint8_t &index, bool force = false)
 {
   Pot &pot = device.pots[index];
   if (pot.getState() == Pot_t::IN_MOTION)
   {
-    sendMidiMessage(index);
+    sendMidiMessage(index, force);
   }
 }
+
 void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t &min, midi::DataByte *value)
 {
   if (bitRead(properties, invertIndex))
@@ -93,11 +94,8 @@ void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataBy
   }
 }
 
-void sendMidiMessage(uint8_t &index)
+void sendMidiMessage(uint8_t &index, bool force = false)
 {
-  // if (isStartup)
-  //       return;
-
   Knob_t &knob = device.activePreset.knobInfo[index];
   Pot &pot = device.pots[index];
 
@@ -147,7 +145,7 @@ void sendMidiMessage(uint8_t &index)
   switch (mode)
   {
   case KNOB_MODE_STANDARD:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       sendStandardCCMessage(macro_a_output, knob.MSB, MSB, channel_a);
       isMidiChanged = true;
@@ -155,7 +153,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_HIRES:
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       sendStandardCCMessage(macro_a_output, knob.MSB, MSB, channel_a);
       sendStandardCCMessage(macro_a_output, knob.LSB, LSB, channel_a);
@@ -165,12 +163,12 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_MACRO:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       sendStandardCCMessage(macro_a_output, knob.MSB, MSB, channel_a);
       isMidiChanged = true;
     }
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       sendStandardCCMessage(macro_b_output, knob.LSB, LSB, channel_b);
       isMidiChanged = true;
@@ -178,7 +176,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_NRPN:
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       if (macro_a_output == OUTPUT_TRS ||
           macro_a_output == OUTPUT_BOTH)
@@ -195,7 +193,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_RPN:
-    if (oldLSB != LSB)
+    if (force || oldLSB != LSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -210,7 +208,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_PROGRAM_CHANGE:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -226,7 +224,7 @@ void sendMidiMessage(uint8_t &index)
     break;
 
   case KNOB_MODE_POLY_AFTER_TOUCH:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -240,7 +238,7 @@ void sendMidiMessage(uint8_t &index)
     }
     break;
   case KNOB_MODE_MONO_AFTER_TOUCH:
-    if (oldMSB != MSB)
+    if (force || oldMSB != MSB)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
@@ -322,62 +320,99 @@ void changePreset(bool direction)
   }
 }
 
-void buttonReleaseAction(bool direction)
+void sendSnapshot()
 {
-  direction ? isPressingAButton = false : isPressingBButton = false;
+  n32b_display.showSynching();
+  for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
+  {
+    muxFactory.update(currentKnob, true);
+  }
 
-  if (millis() - pressedTime < SHORT_PRESS_TIME)
-    device.isPresetMode ? changePreset(direction) : changeChannel(direction);
+  for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
+  {
+    updateKnob(currentKnob, true);
+  }
 }
 
-void buttonPressAction(bool direction)
+void handleButtons()
 {
-  pressedTime = millis();
-}
+  // Read button states
+  bool buttonA = digitalRead(BUTTON_A_PIN) == LOW;
+  bool buttonB = digitalRead(BUTTON_B_PIN) == LOW;
+  unsigned long currentTime = millis();
 
-void renderButtonFunctions()
-{
-  // Must call the loop() function first
-  buttonA.loop();
-  buttonB.loop();
-
-  if (buttonA.isPressed())
+  // Handle button A
+  if (buttonA)
   {
-    isPressingAButton = true;
-    buttonPressAction(1);
-  }
-
-  if (buttonB.isPressed())
-  {
-    isPressingBButton = true;
-    buttonPressAction(0);
-  }
-
-  if (buttonA.isReleased())
-  {
-    buttonReleaseAction(1);
-  }
-
-  if (buttonB.isReleased())
-  {
-    buttonReleaseAction(0);
-  }
-
-  // Switch between channelMode and presetMode
-  if (
-      (isPressingAButton || isPressingBButton) &&
-      (millis() - pressedTime > (unsigned int)(SHORT_PRESS_TIME << 2)))
-  {
-    if (isPressingAButton)
+    if (device.buttonAState == BUTTON_IDLE)
     {
-      device.isPresetMode = false;
-      n32b_display.showChannelNumber(device.globalChannel);
+      device.buttonAState = BUTTON_PRESSED;
+      device.buttonAPressTime = currentTime;
     }
-    if (isPressingBButton)
+    else if (device.buttonAState == BUTTON_PRESSED && (currentTime - device.buttonAPressTime > LONG_PRESS_THRESHOLD))
     {
-      device.isPresetMode = true;
-      n32b_display.showPresetNumber(device.currentPresetIndex);
+      device.buttonAState = BUTTON_LONG_PRESSED;
+      if (device.currentMode == PRESET_SELECT)
+      {
+        device.currentMode = CHANNEL_SELECT;
+        n32b_display.showChannelNumber(device.globalChannel);
+      }
     }
+  }
+  else
+  {
+    if (device.buttonAState == BUTTON_PRESSED)
+    {
+      // Short press detected on release
+      if (device.currentMode == CHANNEL_SELECT)
+      {
+        changeChannel(1); // Change channel up
+      }
+      else if (device.currentMode == PRESET_SELECT)
+      {
+        changePreset(1); // Change preset up
+      }
+    }
+    device.buttonAState = BUTTON_IDLE;
+  }
+
+  // Handle button B
+  if (buttonB)
+  {
+    if (device.buttonBState == BUTTON_IDLE)
+    {
+      device.buttonBState = BUTTON_PRESSED;
+      device.buttonBPressTime = currentTime;
+    }
+    else if (device.buttonBState == BUTTON_PRESSED && (currentTime - device.buttonBPressTime > LONG_PRESS_THRESHOLD))
+    {
+      device.buttonBState = BUTTON_LONG_PRESSED;
+      if (device.currentMode == CHANNEL_SELECT)
+      {
+        device.currentMode = PRESET_SELECT;
+        n32b_display.showPresetNumber(device.currentPresetIndex);
+      }
+      else if (device.currentMode == PRESET_SELECT)
+      {
+        sendSnapshot();
+      }
+    }
+  }
+  else
+  {
+    if (device.buttonBState == BUTTON_PRESSED)
+    {
+      // Short press detected on release
+      if (device.currentMode == CHANNEL_SELECT)
+      {
+        changeChannel(0); // Change channel down
+      }
+      else if (device.currentMode == PRESET_SELECT)
+      {
+        changePreset(0); // Change preset down
+      }
+    }
+    device.buttonBState = BUTTON_IDLE;
   }
 }
 

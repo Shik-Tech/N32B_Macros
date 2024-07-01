@@ -5,19 +5,18 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef ADC_MUX_h
-#define ADC_MUX_h
+#pragma once
 
 #include <Arduino.h>
 #include "definitions.h"
-#include "functions.h"
+#include "pot.h"
 
 class ADC_MUX
 {
 public:
   ADC_MUX(Pot *pots);
   void init();
-  void update(const uint8_t &index);
+  void update(const uint8_t &index, bool force = false);
   void setMultiplexer(const uint8_t &);
   uint8_t pinSelector(const uint8_t &index);
   uint16_t read(const uint8_t &);
@@ -29,5 +28,3 @@ private:
 
   static inline uint16_t FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t nAlphaShift);
 };
-
-#endif

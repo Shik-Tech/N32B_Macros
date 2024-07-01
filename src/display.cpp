@@ -329,3 +329,23 @@ void N32B_DISPLAY::showSaveMessage()
     }
 #endif
 }
+
+void N32B_DISPLAY::showSynching()
+{
+#ifndef N32Bv3
+    clear();
+    write(2, B01011011);
+    write(1, B00010101);
+    delay(1000);
+
+#else
+    clear();
+
+    setDigit(2, MAX7219DIGIT(B01011011));
+    setDigit(1, MAX7219DIGIT(B00010101));
+    setDigit(0, MAX7219DIGIT(B00001101));
+    flush();
+    delay(1000);
+
+#endif
+}

@@ -5,17 +5,12 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef N32B_DEFINITIONS
-#define N32B_DEFINITIONS
+#pragma once
 
 #include <Arduino.h>
-#include <vector>
 #include <USB-MIDI.h>
-#include <ezButton.h>
+#include <vector>
 #include <Pot.h>
-#include <display.h>
-
-USING_NAMESPACE_MIDI;
 
 #ifndef N32Bv3
 constexpr uint8_t threshold_idle_to_motion = 4;
@@ -24,15 +19,15 @@ constexpr uint8_t threshold_idle_to_motion = 2;
 #endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 5, 2};
+const uint8_t firmwareVersion[] PROGMEM = {4, 5, 3};
 
-extern MidiInterface<USBMIDI_NAMESPACE::usbMidiTransport> MIDICoreUSB;
-extern MIDI_NAMESPACE::MidiInterface<MIDI_NAMESPACE::SerialMIDI<HardwareSerial>> MIDICoreSerial;
-extern N32B_DISPLAY n32b_display;
-extern ezButton buttonA;
-extern ezButton buttonB;
+#define LONG_PRESS_THRESHOLD 1000
+#define reset_timeout 4000 // Reset to factory preset timeout
 
-/* Pin setup */
+// byte index in EEPROM for the last used preset
+#define lastUsedPresetAddress 0
+
+// Pin setup
 #ifdef N32Bv3
 enum PinIndices : uint8_t
 {
@@ -70,6 +65,21 @@ enum PinIndices : uint8_t
 };
 #endif
 
+// Button Modes
+enum Mode
+{
+  CHANNEL_SELECT,
+  PRESET_SELECT
+};
+
+// Button States
+enum ButtonState
+{
+  BUTTON_IDLE,
+  BUTTON_PRESSED,
+  BUTTON_LONG_PRESSED
+};
+
 enum COMMANDS_INDEXS : uint8_t
 {
   MANUFACTURER_INDEX = 1,
@@ -97,8 +107,9 @@ enum COMMANDS : uint8_t
   SEND_FIRMWARE_VERSION = 4, // Send the device firmware version
   SYNC_KNOBS = 5,            // Send active preset
   CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
-  START_SYSEX_MESSAGE = 7,   // Announce start of sysEx mesasge
+  // START_SYSEX_MESSAGE = 7,   // Announce start of sysEx mesasge
   SET_THRU_MODE = 8,         // Set the midi THRU behavior
+  SEND_SNAPSHOT = 9,         // Set the midi THRU behavior
   END_OF_TRANSMISSION = 99   // Notify end of transmission
 };
 
@@ -170,13 +181,13 @@ struct Knob_t
   uint8_t PROPERTIES;
   // Using PROPERTIES to reduce storage size.
   // Bits are used as boolean values for inverts and use own channel:
-  // 1 - Invert A
+  // 0 - Invert A
   // 2 - Invert B
   // 3 - Use own channel A
   // 4 - Use own channel B
 
   // Knob mode is defined with 4 bits and need to be shifted to the right to calculate it's value:
-  // 5-8 - Mode value
+  // 4-7 - Mode value
 };
 
 // A preset struct is defining the device preset structure
@@ -193,20 +204,9 @@ struct Device_t
   Pot pots[NUMBER_OF_KNOBS];
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
-  bool isPresetMode{false};
+  Mode currentMode = CHANNEL_SELECT;
+  ButtonState buttonAState = BUTTON_IDLE;
+  ButtonState buttonBState = BUTTON_IDLE;
+  unsigned long buttonAPressTime = 0;
+  unsigned long buttonBPressTime = 0;
 };
-
-/* Device setup data */
-extern Device_t device;
-
-/* Buttons variables */
-extern const unsigned int reset_timeout; // Reset to factory preset timeout
-extern const uint8_t SHORT_PRESS_TIME;   // Milliseconds
-extern unsigned long pressedTime;
-extern bool isPressingAButton;
-extern bool isPressingBButton;
-
-// byte index in EEPROM for the last used preset
-extern uint8_t lastUsedPresetAddress;
-
-#endif

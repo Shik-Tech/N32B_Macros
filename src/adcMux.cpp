@@ -25,7 +25,7 @@ uint16_t ADC_MUX::FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t 
     return (uint16_t)(nPrevValue + nSample - (nPrevValue >> nAlphaShift));
 }
 
-void ADC_MUX::update(const uint8_t &index)
+void ADC_MUX::update(const uint8_t &index, bool force = false)
 {
     setMultiplexer(index);
     delayMicroseconds(50);
@@ -43,7 +43,7 @@ void ADC_MUX::update(const uint8_t &index)
     if (pot.getState() == Pot_t::IDLE)
     {
 
-        if (value_difference > threshold_idle_to_motion)
+        if (value_difference > threshold_idle_to_motion || force)
         {
             pot.setState(Pot_t::IN_MOTION);
         }
@@ -64,8 +64,6 @@ void ADC_MUX::update(const uint8_t &index)
             pot.resetReleaseCounter();
         }
     }
-    // pot.setPreviousValue();
-    // pot.setPreviousThresholdValue(currentThresholdValue);
 }
 
 uint8_t ADC_MUX::pinSelector(const uint8_t &index)

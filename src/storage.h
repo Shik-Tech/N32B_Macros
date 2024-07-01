@@ -5,13 +5,12 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef STORAGE_h
-#define STORAGE_h
+#pragma once
 
 #include <Arduino.h>
 #include <EEPROM.h>
 
-#include "definitions.h"
+#include "devices.h"
 
 bool isEEPROMvalid();
 void formatFactory();
@@ -28,6 +27,4 @@ const uint8_t knobsLocation[] PROGMEM = {
     24, 25, 26, 27,
     20, 21, 22, 23,
     16, 17, 18, 19};
-#endif
-
 #endif

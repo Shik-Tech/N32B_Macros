@@ -5,14 +5,8 @@
   Copyright (c) 2024 SHIK
 */
 
-#include <Arduino.h>
-
-#include "definitions.h"
 #include "functions.h"
-#include "sysex.h"
-#include "adcMux.h"
-
-ADC_MUX muxFactory(device.pots);
+#include "devices.h"
 
 void setup()
 {
@@ -29,10 +23,6 @@ void setup()
   pinMode(LED_PIN, OUTPUT);
   pinMode(BUTTON_A_PIN, INPUT_PULLUP);
   pinMode(BUTTON_B_PIN, INPUT_PULLUP);
-
-  // Set debounce time to 50 milliseconds
-  buttonA.setDebounceTime(50);
-  buttonB.setDebounceTime(50);
 
   /*
    * Factory Reset
@@ -93,7 +83,7 @@ void setup()
   MIDICoreSerial.setHandleMessage(onSerialMessage);
 
   MIDICoreUSB.setHandleSystemExclusive(processSysex);
-  // MIDICoreSerial.setHandleSystemExclusive(processSysex);
+  MIDICoreSerial.setHandleSystemExclusive(processSysex);
 
   MIDICoreUSB.setHandleProgramChange(handleProgramChange);
   MIDICoreSerial.setHandleProgramChange(handleProgramChange);
@@ -123,7 +113,7 @@ void loop()
 
   doMidiRead();
 
-  renderButtonFunctions();
+  handleButtons();
   n32b_display.clearDisplay();
 
 #ifdef N32Bv3

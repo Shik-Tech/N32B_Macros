@@ -5,8 +5,7 @@
   Copyright (c) 2024 SHIK
 */
 
-#ifndef N32B_DISPLAY_h
-#define N32B_DISPLAY_h
+#pragma once
 
 #ifndef N32Bv3
 #include <DigitLedDisplay.h>
@@ -39,10 +38,9 @@ public:
   void showStartUpAnimation();
   void factoryResetAnimation();
   void showSaveMessage();
+  void showSynching();
 
 private:
   unsigned long displayOffTimer;
   unsigned long lastUpdateTime;
 };
-
-#endif

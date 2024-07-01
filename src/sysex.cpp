@@ -42,6 +42,9 @@ void processSysex(unsigned char *data, unsigned int size)
         case SYNC_KNOBS:
             sendActivePreset();
             break;
+        case SEND_SNAPSHOT:
+            sendSnapshot();
+            break;
         default:
             break;
         }
