@@ -15,11 +15,11 @@
 #ifndef N32Bv3
 constexpr uint8_t threshold_idle_to_motion = 4;
 #else
-constexpr uint8_t threshold_idle_to_motion = 2;
+constexpr uint8_t threshold_idle_to_motion = 4;
 #endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 5, 3};
+const uint8_t firmwareVersion[] PROGMEM = {4, 5, 4};
 
 #define LONG_PRESS_THRESHOLD 1000
 #define reset_timeout 4000 // Reset to factory preset timeout
