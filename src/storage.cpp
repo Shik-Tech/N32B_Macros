@@ -6,6 +6,7 @@
 */
 
 #include "storage.h"
+#include <GlobalComponents/GlobalComponents.h>
 
 // Check device version
 bool isEEPROMvalid()
@@ -79,7 +80,7 @@ void loadPreset(uint8_t presetNumber)
 
     // Update the last used preset
     device.currentPresetIndex = presetNumber;
-    n32b_display.showPresetNumber(presetNumber);
+    display.showPresetNumber(presetNumber);
 
     // Save current preset as the active preset.
     // Is commented out to prevent EEPROM from over used
@@ -99,6 +100,6 @@ void savePreset(uint8_t presetNumber)
       EEPROM.update(baseAddress + byteIndex, ((uint8_t *)(&device.activePreset))[byteIndex]);
     }
 
-    n32b_display.showSaveMessage();
+    display.showSaveMessage();
   }
 }

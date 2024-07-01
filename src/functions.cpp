@@ -6,6 +6,7 @@
 */
 
 #include "functions.h"
+#include <GlobalComponents/GlobalComponents.h>
 
 void onUsbMessage(const midi::Message<128> &message)
 {
@@ -14,19 +15,19 @@ void onUsbMessage(const midi::Message<128> &message)
     switch (device.activePreset.thruMode)
     {
     case THRU_USB_USB:
-      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
+      MIDIUSB.send(message.type, message.data1, message.data2, message.channel);
       break;
 
     case THRU_USB_TRS:
-      MIDICoreSerial.send(message);
+      MIDISerial1.send(message);
       break;
 
     case THRU_BOTH_DIRECTIONS:
-      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
-      MIDICoreSerial.send(message);
+      MIDIUSB.send(message.type, message.data1, message.data2, message.channel);
+      MIDISerial1.send(message);
       break;
     }
-    n32b_display.blinkDot(2);
+    display.blinkDot(2);
   }
 }
 
@@ -37,19 +38,19 @@ void onSerialMessage(const midi::Message<128> &message)
     switch (device.activePreset.thruMode)
     {
     case THRU_TRS_TRS:
-      MIDICoreSerial.send(message);
+      MIDISerial1.send(message);
       break;
 
     case THRU_TRS_USB:
-      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
+      MIDIUSB.send(message.type, message.data1, message.data2, message.channel);
       break;
 
     case THRU_BOTH_DIRECTIONS:
-      MIDICoreUSB.send(message.type, message.data1, message.data2, message.channel);
-      MIDICoreSerial.send(message);
+      MIDIUSB.send(message.type, message.data1, message.data2, message.channel);
+      MIDISerial1.send(message);
       break;
     }
-    n32b_display.blinkDot(2);
+    display.blinkDot(2);
   }
 }
 
@@ -181,12 +182,12 @@ void sendMidiMessage(uint8_t &index, bool force)
       if (macro_a_output == OUTPUT_TRS ||
           macro_a_output == OUTPUT_BOTH)
       {
-        sendNrpnMidiMessage(MIDICoreSerial, knob.MSB, knob.LSB, MSB, LSB, channel_a);
+        sendNrpnMidiMessage(MIDISerial1, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       if (macro_a_output == OUTPUT_USB ||
           macro_a_output == OUTPUT_BOTH)
       {
-        sendNrpnMidiMessage(MIDICoreUSB, knob.MSB, knob.LSB, MSB, LSB, channel_a);
+        sendNrpnMidiMessage(MIDIUSB, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       isMidiChanged = true;
     }
@@ -197,11 +198,11 @@ void sendMidiMessage(uint8_t &index, bool force)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
-        sendRpnMidiMessage(MIDICoreSerial, knob.MSB, knob.LSB, MSB, LSB, channel_a);
+        sendRpnMidiMessage(MIDISerial1, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       if (macro_a_output == OUTPUT_USB || macro_a_output == OUTPUT_BOTH)
       {
-        sendRpnMidiMessage(MIDICoreUSB, knob.MSB, knob.LSB, MSB, LSB, channel_a);
+        sendRpnMidiMessage(MIDIUSB, knob.MSB, knob.LSB, MSB, LSB, channel_a);
       }
       isMidiChanged = true;
     }
@@ -212,11 +213,11 @@ void sendMidiMessage(uint8_t &index, bool force)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreSerial.sendProgramChange(MSB, channel_a);
+        MIDISerial1.sendProgramChange(MSB, channel_a);
       }
       if (macro_a_output == OUTPUT_USB || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreUSB.sendProgramChange(MSB, channel_a);
+        MIDIUSB.sendProgramChange(MSB, channel_a);
       }
 
       isMidiChanged = true;
@@ -228,11 +229,11 @@ void sendMidiMessage(uint8_t &index, bool force)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreSerial.sendAfterTouch(knob.MSB, MSB, channel_a);
+        MIDISerial1.sendAfterTouch(knob.MSB, MSB, channel_a);
       }
       if (macro_a_output == OUTPUT_USB || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreUSB.sendAfterTouch(knob.MSB, MSB, channel_a);
+        MIDIUSB.sendAfterTouch(knob.MSB, MSB, channel_a);
       }
       isMidiChanged = true;
     }
@@ -242,11 +243,11 @@ void sendMidiMessage(uint8_t &index, bool force)
     {
       if (macro_a_output == OUTPUT_TRS || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreSerial.sendAfterTouch(MSB, channel_a);
+        MIDISerial1.sendAfterTouch(MSB, channel_a);
       }
       if (macro_a_output == OUTPUT_USB || macro_a_output == OUTPUT_BOTH)
       {
-        MIDICoreUSB.sendAfterTouch(MSB, channel_a);
+        MIDIUSB.sendAfterTouch(MSB, channel_a);
       }
       isMidiChanged = true;
     }
@@ -256,9 +257,9 @@ void sendMidiMessage(uint8_t &index, bool force)
   if (isMidiChanged)
   {
 #ifndef N32Bv3
-    n32b_display.blinkDot(1);
+    display.blinkDot(1);
 #else
-    n32b_display.showValue(MSB);
+    display.showValue(MSB);
 #endif
   }
 
@@ -266,7 +267,7 @@ void sendMidiMessage(uint8_t &index, bool force)
 }
 
 template <typename Transport>
-void sendNrpnMidiMessage(midi::MidiInterface<Transport> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel)
+void sendNrpnMidiMessage(midi::MidiInterface<Transport, CustomMidiSettings> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel)
 {
   MidiInterface.beginNrpn(msbNumber << 7 | lsbNumber, channel);
   MidiInterface.sendNrpnValue(MSB, LSB, channel);
@@ -274,7 +275,7 @@ void sendNrpnMidiMessage(midi::MidiInterface<Transport> &MidiInterface, uint8_t 
 }
 
 template <typename Transport>
-void sendRpnMidiMessage(midi::MidiInterface<Transport> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel)
+void sendRpnMidiMessage(midi::MidiInterface<Transport, CustomMidiSettings> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel)
 {
   MidiInterface.beginRpn(msbNumber << 7 | lsbNumber, channel);
   MidiInterface.sendRpnValue(MSB, LSB, channel);
@@ -285,11 +286,11 @@ void sendStandardCCMessage(uint8_t output, uint8_t message, uint8_t value, midi:
 {
   if (output == OUTPUT_TRS || output == OUTPUT_BOTH)
   {
-    MIDICoreSerial.sendControlChange(message, value, channel);
+    MIDISerial1.sendControlChange(message, value, channel);
   }
   if (output == OUTPUT_USB || output == OUTPUT_BOTH)
   {
-    MIDICoreUSB.sendControlChange(message, value, channel);
+    MIDIUSB.sendControlChange(message, value, channel);
   }
 }
 
@@ -297,7 +298,7 @@ void changeChannel(bool direction)
 {
   device.globalChannel = direction ? (device.globalChannel % 16) + 1 : (device.globalChannel - 2 + 16) % 16 + 1;
 
-  n32b_display.showChannelNumber(device.globalChannel);
+  display.showChannelNumber(device.globalChannel);
 }
 
 void changePreset(bool direction)
@@ -322,7 +323,7 @@ void changePreset(bool direction)
 
 void sendSnapshot()
 {
-  n32b_display.showSynching();
+  display.showSynching();
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
     muxFactory.update(currentKnob, true);
@@ -355,7 +356,7 @@ void handleButtons()
       if (device.currentMode == PRESET_SELECT)
       {
         device.currentMode = CHANNEL_SELECT;
-        n32b_display.showChannelNumber(device.globalChannel);
+        display.showChannelNumber(device.globalChannel);
       }
     }
   }
@@ -390,7 +391,7 @@ void handleButtons()
       if (device.currentMode == CHANNEL_SELECT)
       {
         device.currentMode = PRESET_SELECT;
-        n32b_display.showPresetNumber(device.currentPresetIndex);
+        display.showPresetNumber(device.currentPresetIndex);
       }
       else if (device.currentMode == PRESET_SELECT)
       {
@@ -416,11 +417,11 @@ void handleButtons()
   }
 }
 
-void doMidiRead()
-{
-  MIDICoreSerial.read();
-  MIDICoreUSB.read();
-}
+// void doMidiRead()
+// {
+//   MIDISerial1.read();
+//   MIDIUSB.read();
+// }
 
 void extractMode(uint8_t properties, uint8_t *mode)
 {
