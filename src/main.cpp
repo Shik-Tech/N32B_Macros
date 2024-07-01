@@ -6,15 +6,15 @@
 */
 
 #include "functions.h"
-#include "devices.h"
+#include <GlobalComponents/GlobalComponents.h>
 
 void setup()
 {
 #ifndef N32Bv3
-  n32b_display.setBright(0);
-  n32b_display.setDigitLimit(2);
+  display.setBright(0);
+  display.setDigitLimit(2);
 #else
-  n32b_display.on();
+  display.on();
 #endif
 
   /* Pin setup */
@@ -69,7 +69,7 @@ void setup()
       digitalWrite(LED_PIN, LOW);
       delay(300);
     }
-    n32b_display.factoryResetAnimation();
+    display.factoryResetAnimation();
     formatFactory();
   }
 
@@ -79,20 +79,23 @@ void setup()
   loadPreset(EEPROM.read(lastUsedPresetAddress));
 
   /* Set callbacks */
-  MIDICoreUSB.setHandleMessage(onUsbMessage);
-  MIDICoreSerial.setHandleMessage(onSerialMessage);
+  MIDIUSB.setHandleMessage(onUsbMessage);
+  MIDISerial1.setHandleMessage(onSerialMessage);
 
-  MIDICoreUSB.setHandleSystemExclusive(processSysex);
-  MIDICoreSerial.setHandleSystemExclusive(processSysex);
+  MIDIUSB.setHandleSystemExclusive(processSysex);
+  MIDISerial1.setHandleSystemExclusive(processSysex);
 
-  MIDICoreUSB.setHandleProgramChange(handleProgramChange);
-  MIDICoreSerial.setHandleProgramChange(handleProgramChange);
+  MIDIUSB.setHandleProgramChange(handleProgramChange);
+  MIDISerial1.setHandleProgramChange(handleProgramChange);
 
   /* Initiate MIDI communications, listen to all channels */
-  MIDICoreUSB.begin(MIDI_CHANNEL_OMNI);
-  MIDICoreSerial.begin(MIDI_CHANNEL_OMNI);
+  MIDIUSB.begin(MIDI_CHANNEL_OMNI);
+  MIDISerial1.begin(MIDI_CHANNEL_OMNI);
 
-  n32b_display.showStartUpAnimation();
+  MIDIUSB.turnThruOff();
+  MIDISerial1.turnThruOff();
+
+  display.showStartUpAnimation();
 }
 
 void loop()
@@ -103,7 +106,7 @@ void loop()
   }
 
 #ifdef N32Bv3
-  n32b_display.resetChanged();
+  display.resetChanged();
 #endif
 
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
@@ -114,10 +117,10 @@ void loop()
   doMidiRead();
 
   handleButtons();
-  n32b_display.clearDisplay();
+  display.clearDisplay();
 
 #ifdef N32Bv3
-  if (n32b_display.hasChanged())
+  if (display.hasChanged())
     delayMicroseconds(1000);
 #endif
 }

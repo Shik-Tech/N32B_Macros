@@ -5,7 +5,7 @@
   Copyright (c) 2024 SHIK
 */
 
-#include "display.h"
+#include "Display.h"
 
 #ifndef N32Bv3
 const static byte chars[] = {
@@ -13,7 +13,7 @@ const static byte chars[] = {
 #endif
 
 // Auto clear the display
-void N32B_DISPLAY::clearDisplay(uint16_t readInterval)
+void Display::clearDisplay(uint16_t readInterval)
 {
     if (millis() - displayOffTimer >= readInterval)
     {
@@ -24,11 +24,17 @@ void N32B_DISPLAY::clearDisplay(uint16_t readInterval)
     }
 }
 
-void N32B_DISPLAY::showValue(uint8_t value)
+void Display::showValue(uint8_t value, uint8_t index)
 {
-    // TODO: Force last value to update the display to prevent missing the last value showing
-    // if (millis() - lastUpdateTime < 10)
-    //     return;
+    if (activeKnobIndex == -1)
+    {
+        setActiveKnobIndex(index);
+    }
+
+    if (activeKnobIndex != index)
+    {
+        return;
+    }
 
 #ifndef N32Bv3
     clear();
@@ -49,14 +55,14 @@ void N32B_DISPLAY::showValue(uint8_t value)
 
 // Blink the decimal points
 #ifndef N32Bv3
-void N32B_DISPLAY::blinkDot(uint8_t dotSide)
+void Display::blinkDot(uint8_t dotSide)
 {
     clear();
     write(dotSide, B10000000);
     displayOffTimer = millis();
 }
 #else
-void N32B_DISPLAY::blinkDot(uint8_t nDigit)
+void Display::blinkDot(uint8_t nDigit)
 {
     setDecimalPoint(nDigit);
     flush();
@@ -65,7 +71,7 @@ void N32B_DISPLAY::blinkDot(uint8_t nDigit)
 }
 #endif
 
-void N32B_DISPLAY::showChannelNumber(uint8_t channelNumber)
+void Display::showChannelNumber(uint8_t channelNumber)
 {
 #ifndef N32Bv3
     clear();
@@ -78,7 +84,7 @@ void N32B_DISPLAY::showChannelNumber(uint8_t channelNumber)
     displayOffTimer = millis();
 }
 
-void N32B_DISPLAY::showPresetNumber(uint8_t presetNumber)
+void Display::showPresetNumber(uint8_t presetNumber)
 {
 #ifndef N32Bv3
     clear();
@@ -92,7 +98,7 @@ void N32B_DISPLAY::showPresetNumber(uint8_t presetNumber)
     displayOffTimer = millis();
 }
 
-void N32B_DISPLAY::showStartUpAnimation()
+void Display::showStartUpAnimation()
 {
 #ifndef N32Bv3
     uint8_t delayTime = 160;
@@ -196,7 +202,7 @@ void N32B_DISPLAY::showStartUpAnimation()
 }
 
 // Show animation after factory reset (infinity symbol animation)
-void N32B_DISPLAY::factoryResetAnimation()
+void Display::factoryResetAnimation()
 {
     const uint8_t delayTime = 100;
     const uint8_t repeats = 3;
@@ -293,7 +299,7 @@ void N32B_DISPLAY::factoryResetAnimation()
 }
 
 // Show save message "Sv."
-void N32B_DISPLAY::showSaveMessage()
+void Display::showSaveMessage()
 {
 #ifndef N32Bv3
     clear();
@@ -330,7 +336,7 @@ void N32B_DISPLAY::showSaveMessage()
 #endif
 }
 
-void N32B_DISPLAY::showSynching()
+void Display::showSynching()
 {
 #ifndef N32Bv3
     clear();
@@ -348,4 +354,17 @@ void N32B_DISPLAY::showSynching()
     delay(1000);
 
 #endif
+}
+
+int8_t Display::getActiveKnobIndex()
+{
+    return activeKnobIndex;
+}
+void Display::setActiveKnobIndex(uint8_t index)
+{
+    activeKnobIndex = index;
+}
+void Display::resetActiveKnobIndex()
+{
+    activeKnobIndex = -1;
 }

@@ -6,6 +6,7 @@
 */
 
 #include "sysex.h"
+#include <GlobalComponents/GlobalComponents.h>
 
 void processSysex(unsigned char *data, unsigned int size)
 {
@@ -77,7 +78,8 @@ void sendDeviceFirmwareVersion()
     {
         data[i + 1] = EEPROM.read(EEPROM.length() - i);
     }
-    MIDICoreUSB.sendSysEx(5, data);
+    MIDIUSB.sendSysEx(5, data);
+    MIDISerial1.sendSysEx(5, data);
 }
 void sendActivePreset()
 {
@@ -107,7 +109,8 @@ void sendActivePreset()
             device.activePreset.knobInfo[i].MAX_B,
             properties,
             mode};
-        MIDICoreUSB.sendSysEx(15, knobsData);
+        MIDIUSB.sendSysEx(15, knobsData);
+        MIDISerial1.sendSysEx(15, knobsData);
 #else
         uint8_t indexId = pgm_read_word_near(knobsLocation + i);
         uint8_t channel_a = device.activePreset.knobInfo[indexId].CHANNELS >> 4;
@@ -132,7 +135,8 @@ void sendActivePreset()
             device.activePreset.knobInfo[indexId].MAX_B,
             properties,
             mode};
-        MIDICoreUSB.sendSysEx(15, knobsData);
+        MIDIUSB.sendSysEx(15, knobsData);
+        MIDISerial1.sendSysEx(15, knobsData);
 #endif
     }
 
@@ -141,13 +145,15 @@ void sendActivePreset()
         SET_THRU_MODE,
         device.activePreset.thruMode};
 
-    MIDICoreUSB.sendSysEx(3, presetThruData);
+    MIDIUSB.sendSysEx(3, presetThruData);
+    MIDISerial1.sendSysEx(3, presetThruData);
 
     uint8_t endOfTransmissionData[2] = {
         SHIK_MANUFACTURER_ID,
         END_OF_TRANSMISSION};
 
-    MIDICoreUSB.sendSysEx(2, endOfTransmissionData);
+    MIDIUSB.sendSysEx(2, endOfTransmissionData);
+    MIDISerial1.sendSysEx(2, endOfTransmissionData);
 }
 void setMidiThruMode(byte mode)
 {
