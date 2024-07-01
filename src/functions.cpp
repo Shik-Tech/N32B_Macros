@@ -53,7 +53,7 @@ void onSerialMessage(const midi::Message<128> &message)
   }
 }
 
-void updateKnob(uint8_t &index, bool force = false)
+void updateKnob(uint8_t &index, bool force)
 {
   Pot &pot = device.pots[index];
   if (pot.getState() == Pot_t::IN_MOTION)
@@ -94,7 +94,7 @@ void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataBy
   }
 }
 
-void sendMidiMessage(uint8_t &index, bool force = false)
+void sendMidiMessage(uint8_t &index, bool force)
 {
   Knob_t &knob = device.activePreset.knobInfo[index];
   Pot &pot = device.pots[index];

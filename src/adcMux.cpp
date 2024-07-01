@@ -25,7 +25,7 @@ uint16_t ADC_MUX::FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t 
     return (uint16_t)(nPrevValue + nSample - (nPrevValue >> nAlphaShift));
 }
 
-void ADC_MUX::update(const uint8_t &index, bool force = false)
+void ADC_MUX::update(const uint8_t &index, bool force)
 {
     setMultiplexer(index);
     delayMicroseconds(50);
