@@ -42,7 +42,7 @@ public:
   void operator=(Display const &) = delete;
 
   void clearDisplay(uint16_t readInterval = 1000);
-  void showValue(uint8_t);
+  void showValue(uint8_t, uint8_t);
   void blinkDot(uint8_t);
   void showChannelNumber(uint8_t);
   void showPresetNumber(uint8_t);
@@ -50,6 +50,9 @@ public:
   void factoryResetAnimation();
   void showSaveMessage();
   void showSynching();
+  int8_t getActiveKnobIndex();
+  void setActiveKnobIndex(uint8_t index);
+  void resetActiveKnobIndex();
 
 private:
 #ifndef N32Bv3
@@ -60,4 +63,5 @@ private:
 
   unsigned long displayOffTimer;
   unsigned long lastUpdateTime;
+  int8_t activeKnobIndex = -1;
 };

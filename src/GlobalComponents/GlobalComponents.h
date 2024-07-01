@@ -9,7 +9,7 @@
 
 #include <USB-MIDI.h>
 #include <MidiInterfaces/MidiInterfaces.h>
-#include <display.h>
+#include <Display/Display.h>
 #include <adcMux.h>
 
 // MIDI Interfaces

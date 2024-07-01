@@ -5,7 +5,7 @@
   Copyright (c) 2024 SHIK
 */
 
-#include "display.h"
+#include "Display.h"
 
 #ifndef N32Bv3
 const static byte chars[] = {
@@ -24,11 +24,17 @@ void Display::clearDisplay(uint16_t readInterval)
     }
 }
 
-void Display::showValue(uint8_t value)
+void Display::showValue(uint8_t value, uint8_t index)
 {
-    // TODO: Force last value to update the display to prevent missing the last value showing
-    // if (millis() - lastUpdateTime < 10)
-    //     return;
+    if (activeKnobIndex == -1)
+    {
+        setActiveKnobIndex(index);
+    }
+
+    if (activeKnobIndex != index)
+    {
+        return;
+    }
 
 #ifndef N32Bv3
     clear();
@@ -348,4 +354,17 @@ void Display::showSynching()
     delay(1000);
 
 #endif
+}
+
+int8_t Display::getActiveKnobIndex()
+{
+    return activeKnobIndex;
+}
+void Display::setActiveKnobIndex(uint8_t index)
+{
+    activeKnobIndex = index;
+}
+void Display::resetActiveKnobIndex()
+{
+    activeKnobIndex = -1;
 }

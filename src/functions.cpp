@@ -57,9 +57,15 @@ void onSerialMessage(const midi::Message<128> &message)
 void updateKnob(uint8_t &index, bool force)
 {
   Pot &pot = device.pots[index];
-  if (pot.getState() == Pot_t::IN_MOTION)
+  Pot_t::State potState = pot.getState();
+  if (potState == Pot_t::IN_MOTION)
   {
     sendMidiMessage(index, force);
+  }
+
+  if (potState == Pot_t::IDLE && display.getActiveKnobIndex() == index)
+  {
+    display.resetActiveKnobIndex();
   }
 }
 
@@ -259,7 +265,7 @@ void sendMidiMessage(uint8_t &index, bool force)
 #ifndef N32Bv3
     display.blinkDot(1);
 #else
-    display.showValue(MSB);
+    display.showValue(MSB, index);
 #endif
   }
 
