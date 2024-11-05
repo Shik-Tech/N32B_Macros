@@ -11,6 +11,11 @@
 
 #include <Arduino.h>
 
+#ifndef __AVR__
+#include <SPI.h>
+constexpr uint32_t Display_SPI_Freq = UINT32_C(12000000);
+#endif
+
 #define MAX7219DIGIT(data) \
 	(\
 	 (((data) & 0x80)? 0x80 : 0) | (((data) & 0x40)? 0x01 : 0) | (((data) & 0x20)? 0x02 : 0) | \
@@ -28,6 +33,10 @@ class TLC59282_Display
 		uint8_t Pin_LAT;
 		uint8_t Pin_BLANK;
 		
+	#ifndef __AVR__
+		SPIClass * pSPI;
+	#endif
+		
 		uint8_t Digits[Display_NbDigits];
 		
 		void toggleLAT();
@@ -38,6 +47,9 @@ class TLC59282_Display
 	
 	public:
 		TLC59282_Display(uint8_t SIN, uint8_t SCLK, uint8_t LAT, uint8_t BLANK);
+	#ifndef __AVR__
+		TLC59282_Display(SPIClass * pSPI_Intf, uint8_t LAT, uint8_t BLANK);
+	#endif
 		
 		void on();
 		void off();

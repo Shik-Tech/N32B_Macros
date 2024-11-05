@@ -8,22 +8,23 @@
 #pragma once
 
 #include <Arduino.h>
-// #include "definitions.h"
 
-struct Pot_t
-{
-    enum State
-    {
-        IDLE,
-        IN_MOTION
-    } state;
-    uint8_t release_counter;
-    uint16_t current_value;
-    uint16_t previous_value;
-};
 class Pot
 {
 public:
+    struct Pot_t
+    {
+        enum State
+        {
+            IDLE,
+            IN_MOTION
+        } state;
+        uint8_t release_counter;
+        uint16_t current_value;
+        uint16_t previous_value;
+        uint16_t previous_value_EMA;
+    };
+    
     Pot()
     {
         potData.state = Pot_t::IDLE;
@@ -36,6 +37,7 @@ public:
     void setState(Pot_t::State s) { potData.state = s; }
     void setCurrentValue(uint16_t v) { potData.current_value = v; }
     void setPreviousValue() { potData.previous_value = potData.current_value; }
+    void setPreviousValue_EMA(uint16_t v) { potData.previous_value_EMA = v; }
     void resetReleaseCounter() { potData.release_counter = 0; }
     void increaseReleaseCounter() { potData.release_counter++; }
 
@@ -43,6 +45,7 @@ public:
     Pot_t::State &getState() { return potData.state; }
     uint16_t &getCurrentValue() { return potData.current_value; }
     uint16_t &getPreviousValue() { return potData.previous_value; }
+    uint16_t &getPreviousValue_EMA() { return potData.previous_value_EMA; }
     uint8_t &getReleaseCounter() { return potData.release_counter; }
 
 private:

@@ -9,17 +9,21 @@
 
 #include <Arduino.h>
 #include <USB-MIDI.h>
+#include <array>
+#include <string>
 #include <vector>
 #include <Pot.h>
 
-#ifndef N32Bv3
-constexpr uint8_t threshold_idle_to_motion = 4;
-#else
-constexpr uint8_t threshold_idle_to_motion = 4;
-#endif
-constexpr uint8_t threshold_motion_to_idle = 16;
-
 const uint8_t firmwareVersion[] PROGMEM = {4, 5, 4};
+
+constexpr uint8_t TIMER_MIDIREAD_ID = 2;
+constexpr uint32_t TIMER_MIDIREAD_PERIOD_US = UINT32_C(1000);
+
+constexpr uint8_t ADC_SamplingCycles = 32;
+constexpr uint16_t ADC_AvgSamples = 64;
+
+constexpr uint8_t threshold_idle_to_motion = 8;
+constexpr uint8_t threshold_motion_to_idle = 8;
 
 #define LONG_PRESS_THRESHOLD 1000
 #define reset_timeout 4000 // Reset to factory preset timeout
@@ -27,43 +31,14 @@ const uint8_t firmwareVersion[] PROGMEM = {4, 5, 4};
 // byte index in EEPROM for the last used preset
 #define lastUsedPresetAddress 0
 
-// Pin setup
-#ifdef N32Bv3
-enum PinIndices : uint8_t
+#define DISPLAY_SPI SPI
+
+// Buttons
+enum ButtonPins
 {
-  MUX_A_SIG = 8,
-  MUX_B_SIG = 9,
-  MIDI_TX_PIN = 1,
-  MUX_S0 = 4,
-  MUX_S1 = 5,
-  MUX_S2 = 6,
-  MUX_S3 = 7,
-  LED_PIN = 17,
-  SIN = 16,
-  LAT = 10,
-  SCLK = 15,
-  BLANK = 14,
-  BUTTON_A_PIN = A3,
-  BUTTON_B_PIN = A2
+  BUTTON_A = SWT1,
+  BUTTON_B = SWT2
 };
-#else
-enum PinIndices : uint8_t
-{
-  MUX_A_SIG = 8,
-  MUX_B_SIG = 9,
-  MIDI_TX_PIN = 1,
-  MUX_S0 = 2,
-  MUX_S1 = 3,
-  MUX_S2 = 4,
-  MUX_S3 = 5,
-  LED_PIN = 17,
-  DIN = 16,
-  CS = 10,
-  CLK = 15,
-  BUTTON_A_PIN = A3,
-  BUTTON_B_PIN = A2
-};
-#endif
 
 // Button Modes
 enum Mode
@@ -201,7 +176,8 @@ struct Preset_t
 struct Device_t
 {
   Preset_t activePreset{0};
-  Pot pots[NUMBER_OF_KNOBS];
+  //Pot pots[NUMBER_OF_KNOBS];
+  std::array<Pot, NUMBER_OF_KNOBS> pots;
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   Mode currentMode = CHANNEL_SELECT;

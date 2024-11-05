@@ -14,4 +14,5 @@
 USING_NAMESPACE_MIDI;
 
 extern Device_t device;
+extern CustomADC customADC;
 extern ADC_MUX muxFactory;

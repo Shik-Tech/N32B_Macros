@@ -8,13 +8,25 @@
 #include "storage.h"
 #include <GlobalComponents/GlobalComponents.h>
 
+JC_EEPROM EEPROM(EEPROM_Size, 1, EEPROM_PageSize, 0x50);
+
+void storageInit()
+{
+  for (uint8_t i = 0; i < 3; i++)
+  {
+    byte i2cStat = EEPROM.begin(JC_EEPROM::twiClock400kHz);
+    if (i2cStat == 0)
+        break;
+  }
+}
+
 // Check device version
 bool isEEPROMvalid()
 {
   for (uint8_t i = 3; i > 0; i--)
   {
-    uint8_t byte = EEPROM.read(EEPROM.length() - i);
-    uint8_t versionDigit = pgm_read_word_near(firmwareVersion + i - 1);
+    uint8_t byte = EEPROM.read(EEPROM_Size - i);
+    uint8_t versionDigit = firmwareVersion[i - 1];
     if (!(byte == versionDigit))
       return false;
   }
@@ -31,20 +43,17 @@ void formatFactory()
 
   for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
   {
-#ifdef N32Bv3
     uint8_t indexId = i;
-#else
-    uint8_t indexId = pgm_read_word_near(knobsLocation + i);
-#endif
+
     defaultPreset.knobInfo[indexId].MSB = i;
     defaultPreset.knobInfo[indexId].LSB = i + 32;
     defaultPreset.knobInfo[indexId].MIN_A = 0;
     defaultPreset.knobInfo[indexId].MIN_B = 0;
     defaultPreset.knobInfo[indexId].MAX_A = 127;
     defaultPreset.knobInfo[indexId].MAX_B = 127;
-    defaultPreset.knobInfo[indexId].OUTPUTS = B00001111;
-    defaultPreset.knobInfo[indexId].CHANNELS = B00000000;
-    defaultPreset.knobInfo[indexId].PROPERTIES = B00010000;
+    defaultPreset.knobInfo[indexId].OUTPUTS = 0b00001111;
+    defaultPreset.knobInfo[indexId].CHANNELS = 0b00000000;
+    defaultPreset.knobInfo[indexId].PROPERTIES = 0b00010000;
   }
   defaultPreset.thruMode = THRU_OFF;
 
@@ -62,7 +71,7 @@ void formatFactory()
   for (uint8_t i = 3; i > 0; i--)
   {
     uint8_t versionDigit = pgm_read_word_near(firmwareVersion + i - 1);
-    EEPROM.update(EEPROM.length() - i, versionDigit);
+    EEPROM.update(EEPROM_Size - i, versionDigit);
   }
 }
 

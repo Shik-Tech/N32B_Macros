@@ -57,13 +57,13 @@ void onSerialMessage(const midi::Message<128> &message)
 void updateKnob(uint8_t &index, bool force)
 {
   Pot &pot = device.pots[index];
-  Pot_t::State potState = pot.getState();
-  if (potState == Pot_t::IN_MOTION)
+  Pot::Pot_t::State potState = pot.getState();
+  if (potState == Pot::Pot_t::IN_MOTION)
   {
     sendMidiMessage(index, force);
   }
 
-  if (potState == Pot_t::IDLE && display.getActiveKnobIndex() == index)
+  if (potState == Pot::Pot_t::IDLE && display.getActiveKnobIndex() == index)
   {
     display.resetActiveKnobIndex();
   }
@@ -262,14 +262,8 @@ void sendMidiMessage(uint8_t &index, bool force)
 
   if (isMidiChanged)
   {
-#ifndef N32Bv3
-    display.blinkDot(1);
-#else
     display.showValue(MSB, index);
-#endif
   }
-
-  pot.setPreviousValue();
 }
 
 template <typename Transport>
@@ -330,11 +324,12 @@ void changePreset(bool direction)
 void sendSnapshot()
 {
   display.showSynching();
+  /*
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
     muxFactory.update(currentKnob, true);
   }
-
+  */
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
     updateKnob(currentKnob, true);
@@ -344,8 +339,8 @@ void sendSnapshot()
 void handleButtons()
 {
   // Read button states
-  bool buttonA = digitalRead(BUTTON_A_PIN) == LOW;
-  bool buttonB = digitalRead(BUTTON_B_PIN) == LOW;
+  bool buttonA = digitalRead(BUTTON_A) == LOW;
+  bool buttonB = digitalRead(BUTTON_B) == LOW;
   unsigned long currentTime = millis();
 
   // Handle button A
@@ -431,7 +426,7 @@ void handleButtons()
 
 void extractMode(uint8_t properties, uint8_t *mode)
 {
-  *mode = (properties & B11110000) >> 4;
+  *mode = (properties & 0b11110000) >> 4;
 }
 void extractChannels(uint8_t data, uint8_t properties, midi::Channel *channel_a, midi::Channel *channel_b)
 {

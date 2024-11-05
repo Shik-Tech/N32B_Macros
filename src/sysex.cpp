@@ -76,7 +76,7 @@ void sendDeviceFirmwareVersion()
     // Send firmware version
     for (uint8_t i = 3; i > 0; i--)
     {
-        data[i + 1] = EEPROM.read(EEPROM.length() - i);
+        data[i + 1] = EEPROM.read(EEPROM_Size - i);
     }
     MIDIUSB.sendSysEx(5, data);
     MIDISerial1.sendSysEx(5, data);
@@ -86,7 +86,6 @@ void sendActivePreset()
     // Send current preset
     for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
     {
-#ifdef N32Bv3
         uint8_t channel_a = device.activePreset.knobInfo[i].CHANNELS >> 4;
         uint8_t channel_b = device.activePreset.knobInfo[i].CHANNELS & 0xF;
         uint8_t output_a = device.activePreset.knobInfo[i].OUTPUTS >> 2;
@@ -111,33 +110,6 @@ void sendActivePreset()
             mode};
         MIDIUSB.sendSysEx(15, knobsData);
         MIDISerial1.sendSysEx(15, knobsData);
-#else
-        uint8_t indexId = pgm_read_word_near(knobsLocation + i);
-        uint8_t channel_a = device.activePreset.knobInfo[indexId].CHANNELS >> 4;
-        uint8_t channel_b = device.activePreset.knobInfo[indexId].CHANNELS & 0xF;
-        uint8_t output_a = device.activePreset.knobInfo[indexId].OUTPUTS >> 2;
-        uint8_t output_b = device.activePreset.knobInfo[indexId].OUTPUTS & 0x3;
-        uint8_t properties = device.activePreset.knobInfo[indexId].PROPERTIES & 0xF;
-        uint8_t mode = device.activePreset.knobInfo[indexId].PROPERTIES >> 4;
-        uint8_t knobsData[15] = {
-            SHIK_MANUFACTURER_ID,
-            SYNC_KNOBS,
-            pgm_read_word_near(knobsLocation + i),
-            device.activePreset.knobInfo[indexId].MSB,
-            device.activePreset.knobInfo[indexId].LSB,
-            channel_a,
-            channel_b,
-            output_a,
-            output_b,
-            device.activePreset.knobInfo[indexId].MIN_A,
-            device.activePreset.knobInfo[indexId].MAX_A,
-            device.activePreset.knobInfo[indexId].MIN_B,
-            device.activePreset.knobInfo[indexId].MAX_B,
-            properties,
-            mode};
-        MIDIUSB.sendSysEx(15, knobsData);
-        MIDISerial1.sendSysEx(15, knobsData);
-#endif
     }
 
     uint8_t presetThruData[3] = {

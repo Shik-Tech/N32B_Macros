@@ -5,26 +5,39 @@
   Copyright (c) 2024 SHIK
 */
 
-#pragma once
+#ifndef ADC_MUX_h
+#define ADC_MUX_h
 
-#include <Arduino.h>
-#include "definitions.h"
-#include "pot.h"
+#include <vector>
+#include <definitions.h>
+#include <CustomADC.h>
+#include <Pot.h>
+
+constexpr uint8_t NUMBER_OF_CONTROLS = NUMBER_OF_KNOBS;
 
 class ADC_MUX
 {
 public:
-  ADC_MUX(Pot *pots);
-  void init();
-  void update(const uint8_t &index, bool force = false);
+  ADC_MUX(std::array<Pot, NUMBER_OF_CONTROLS> &potsRef, CustomADC &customADC);
+
+  void update(uint16_t sample);
   void setMultiplexer(const uint8_t &);
   uint8_t pinSelector(const uint8_t &index);
-  uint16_t read(const uint8_t &);
+  void triggerADC(const uint8_t &);
 
 private:
-  Pot *pots;
-  const uint8_t signalPin[2] = {MUX_A_SIG, MUX_B_SIG};
-  const uint8_t channels[4] = {MUX_S0, MUX_S1, MUX_S2, MUX_S3};
+  const uint8_t signalPin[2] = {AN_MUX_OUT1, AN_MUX_OUT2};
+  const uint8_t channels[4] = {AN_MUX_S0, AN_MUX_S1, AN_MUX_S2, AN_MUX_S3};
+  std::array<Pot, NUMBER_OF_CONTROLS> &pots;
+  
+  static constexpr uint16_t muxSettlingDelay = 5;	// µs
+  
+  CustomADC &adc;
+  
+  static constexpr uint8_t invalidConvChannelIndex = NUMBER_OF_CONTROLS;
+  uint8_t curConvChannelIndex = invalidConvChannelIndex;
 
   static inline uint16_t FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t nAlphaShift);
 };
+
+#endif

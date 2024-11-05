@@ -8,6 +8,8 @@
 
 #include "TLC59282_Display.h"
 
+#ifdef __AVR__
+
 // LED segment values for digits 0..9.
 static const uint8_t Digits7S[] PROGMEM = {
 	B00111111, B00000110, B01011011, B01001111, B01100110,
@@ -16,14 +18,28 @@ static const uint8_t Digits7S[] PROGMEM = {
 
 static constexpr uint8_t DecimalPoint7S = B10000000;
 
-#ifdef __AVR__
 #define TLC59282_GET7SDIGIT(n)		pgm_read_byte_near(Digits7S + (n))
+
 #else
+
+// LED segment values for digits 0..9.
+static const uint8_t Digits7S[] PROGMEM = {
+	0b00111111, 0b00000110, 0b01011011, 0b01001111, 0b01100110,
+	0b01101101, 0b01111101, 0b00000111, 0b01111111, 0b01101111
+};
+
+static constexpr uint8_t DecimalPoint7S = 0b10000000;
+
 #define TLC59282_GET7SDIGIT(n)		Digits7S[n]
+
 #endif
 
 TLC59282_Display::TLC59282_Display(uint8_t SIN, uint8_t SCLK, uint8_t LAT, uint8_t BLANK)
 {
+#ifndef __AVR__
+	pSPI = nullptr;
+#endif
+	
 	Pin_SIN = SIN;
 	Pin_SCLK = SCLK;
 	Pin_LAT = LAT;
@@ -43,6 +59,34 @@ TLC59282_Display::TLC59282_Display(uint8_t SIN, uint8_t SCLK, uint8_t LAT, uint8
 	bChanged = false;
 	bOn = false;
 }
+
+#ifndef __AVR__
+TLC59282_Display::TLC59282_Display(SPIClass * pSPI_Intf, uint8_t LAT, uint8_t BLANK)
+{
+	pSPI = pSPI_Intf;
+	
+	Pin_SIN = 0;
+	Pin_SCLK = 0;
+	Pin_LAT = LAT;
+	Pin_BLANK = BLANK;
+	
+	pinMode(Pin_LAT, OUTPUT);
+	pinMode(Pin_BLANK, OUTPUT);
+	
+	digitalWrite(Pin_LAT, LOW);
+	digitalWrite(Pin_BLANK, HIGH);
+	
+	if (pSPI != nullptr)
+	{
+		pSPI->begin();
+		pSPI->beginTransaction(SPISettings(Display_SPI_Freq, MSBFIRST, SPI_MODE0));
+	}
+	
+	clear();
+	bChanged = false;
+	bOn = false;
+}
+#endif
 
 void TLC59282_Display::on()
 {
@@ -89,8 +133,20 @@ void TLC59282_Display::flush(uint8_t nbDigits)
 	
 	toggleLAT();
 	
+#ifndef __AVR__
+	if (pSPI != nullptr)
+	{
+		for (uint8_t i = nbDigits; i > 0; i--)
+			pSPI->transfer(Digits[i - 1]);
+	}
+	else
+	{
+#endif
 	for (uint8_t i = nbDigits; i > 0; i--)
 		writeByte(Digits[i - 1]);
+#ifndef __AVR__
+	}
+#endif
 	
 	toggleLAT();
 	
