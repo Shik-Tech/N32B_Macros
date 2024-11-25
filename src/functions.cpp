@@ -6,7 +6,8 @@
 */
 
 #include "functions.h"
-#include <GlobalComponents/GlobalComponents.h>
+#include "GlobalComponents/GlobalComponents.h"
+#include "ControlEventBuffer.h"
 
 void onUsbMessage(const midi::Message<128> &message)
 {
@@ -54,19 +55,29 @@ void onSerialMessage(const midi::Message<128> &message)
   }
 }
 
-void updateKnob(uint8_t &index, bool force)
+void handleKnobEvent(ControlEvent &event)
 {
-  Pot &pot = device.pots[index];
-  Pot::Pot_t::State potState = pot.getState();
-  if (potState == Pot::Pot_t::IN_MOTION)
-  {
-    sendMidiMessage(index, force);
-  }
-
-  if (potState == Pot::Pot_t::IDLE && display.getActiveKnobIndex() == index)
-  {
-    display.resetActiveKnobIndex();
-  }
+	switch (event.type)
+	{
+	case ControlEvent::EventType::VALUE_CHANGE:
+		if (event.controlIndex < NUMBER_OF_KNOBS)
+		{
+			sendMidiMessage(event.controlIndex, event.value);
+			
+			Pot &pot = device.pots[event.controlIndex];
+			pot.setPreviousValue(event.value);
+		}
+		break;
+	
+	case ControlEvent::EventType::MOTION_TO_IDLE:
+		if (display.getActiveKnobIndex() == event.controlIndex)
+		{
+			display.resetActiveKnobIndex();
+		}
+		break;
+	
+	default: ;
+	}
 }
 
 void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t &min, midi::DataByte *value)
@@ -76,6 +87,7 @@ void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t 
     *value = max - (*value - min);
   }
 }
+
 void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataByte *outputValue, bool isLSB = false)
 {
   // Define the total range based on the min and max settings
@@ -101,12 +113,12 @@ void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataBy
   }
 }
 
-void sendMidiMessage(uint8_t &index, bool force)
+void sendMidiMessage(uint8_t &index, uint16_t controlValue, bool force)
 {
   Knob_t &knob = device.activePreset.knobInfo[index];
   Pot &pot = device.pots[index];
 
-  uint16_t value_14bit = pot.getCurrentValue();
+  uint16_t value_14bit = force? pot.getCurrentValue() : controlValue;
   uint16_t prev_value_14bit = pot.getPreviousValue();
   uint8_t oldMSB;
   uint8_t oldLSB;
@@ -266,6 +278,11 @@ void sendMidiMessage(uint8_t &index, bool force)
   }
 }
 
+void forceSendMidiMessage(uint8_t &index)
+{
+	sendMidiMessage(index, 0, true);
+}
+
 template <typename Transport>
 void sendNrpnMidiMessage(midi::MidiInterface<Transport, CustomMidiSettings> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel)
 {
@@ -324,15 +341,11 @@ void changePreset(bool direction)
 void sendSnapshot()
 {
   display.showSynching();
-  /*
+  
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
-    muxFactory.update(currentKnob, true);
-  }
-  */
-  for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
-  {
-    updateKnob(currentKnob, true);
+    //updateKnob(currentKnob, true);
+    forceSendMidiMessage(currentKnob);
   }
 }
 

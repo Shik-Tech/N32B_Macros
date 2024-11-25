@@ -12,7 +12,8 @@
 #include <array>
 #include <string>
 #include <vector>
-#include <Pot.h>
+#include "Pot.h"
+#include "ControlEventBuffer.h"
 
 const uint8_t firmwareVersion[] PROGMEM = {4, 5, 4};
 
@@ -32,6 +33,8 @@ constexpr uint8_t threshold_motion_to_idle = 8;
 #define lastUsedPresetAddress 0
 
 #define DISPLAY_SPI SPI
+
+constexpr uint16_t CONTROL_EVENT_BUFFER_SIZE = 128;
 
 // Buttons
 enum ButtonPins
@@ -178,6 +181,7 @@ struct Device_t
   Preset_t activePreset{0};
   //Pot pots[NUMBER_OF_KNOBS];
   std::array<Pot, NUMBER_OF_KNOBS> pots;
+  ControlEventBuffer<CONTROL_EVENT_BUFFER_SIZE> potsEventBuffer;
   midi::Channel globalChannel{1};
   byte currentPresetIndex{0};
   Mode currentMode = CHANNEL_SELECT;

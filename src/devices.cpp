@@ -10,4 +10,4 @@
 /* Device setup data */
 Device_t device;
 CustomADC customADC;
-ADC_MUX muxFactory(device.pots, customADC);
+ADC_MUX muxFactory(device.pots, customADC, device.potsEventBuffer);

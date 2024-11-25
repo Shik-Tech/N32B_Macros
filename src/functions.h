@@ -10,18 +10,20 @@
 #include <Arduino.h>
 // #include "definitions.h"
 #include "storage.h"
-#include <MidiInterfaces/MidiInterfaces.h>
+#include "MidiInterfaces/MidiInterfaces.h"
 
 USING_NAMESPACE_MIDI;
 
 void onUsbMessage(const midi::Message<128> &);
 void onSerialMessage(const midi::Message<128> &);
 
-void updateKnob(uint8_t &index, bool force = false);
+//void updateKnob(uint8_t &index, bool force = false);
+void handleKnobEvent(ControlEvent &event);
 
 void invertValue(uint8_t, uint8_t, uint8_t &, uint8_t &, midi::DataByte *);
 void scaleValuesByRange(uint16_t, uint8_t &, uint8_t &, midi::DataByte *, bool);
-void sendMidiMessage(uint8_t &index, bool force = false);
+void sendMidiMessage(uint8_t &index, uint16_t controlValue, bool force = false);
+void forceSendMidiMessage(uint8_t &index);
 
 template <typename Transport>
 void sendNrpnMidiMessage(midi::MidiInterface<Transport, CustomMidiSettings> &MidiInterface, uint8_t &msbNumber, uint8_t &lsbNumber, midi::DataByte &MSB, midi::DataByte &LSB, midi::Channel &channel);

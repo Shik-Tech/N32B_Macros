@@ -8,8 +8,9 @@
 #include "adcMux.h"
 
 ADC_MUX::ADC_MUX(
-    std::array<Pot, NUMBER_OF_CONTROLS> &potsRef, CustomADC &customADC)
-    : pots(potsRef), adc(customADC)
+    std::array<Pot, NUMBER_OF_CONTROLS> &potsRef, CustomADC &customADC,
+    ControlEventBuffer<CONTROL_EVENT_BUFFER_SIZE> &potsEventBuffer)
+    : pots(potsRef), adc(customADC), controlEventBuffer(potsEventBuffer)
 {
     for (uint8_t i = 0; i < 4; i++)
     {
@@ -40,6 +41,7 @@ void ADC_MUX::update(uint16_t sample)
 		return;
 	}
 	
+	const uint8_t controlIndex = curConvChannelIndex;
 	const uint16_t sensorRead = sample;
 	
 	Pot &pot = pots[curConvChannelIndex];
@@ -58,8 +60,10 @@ void ADC_MUX::update(uint16_t sample)
 
     pot.setCurrentValue(filteredValue);
     pot.setPreviousValue_EMA(filteredValue_EMA);
-
-    uint16_t value_difference = (filteredValue >= pot.getPreviousValue()) ? (filteredValue - pot.getPreviousValue()) : (pot.getPreviousValue() - filteredValue);
+	
+	uint16_t previousFilteredValue = pot.getPreviousValue_Filtered();
+    uint16_t value_difference = (filteredValue >= previousFilteredValue) ?
+		(filteredValue - previousFilteredValue) : (previousFilteredValue - filteredValue);
 
     if (pot.getState() == Pot::Pot_t::IDLE)
     {
@@ -77,6 +81,8 @@ void ADC_MUX::update(uint16_t sample)
             {
                 pot.setState(Pot::Pot_t::IDLE);
                 pot.resetReleaseCounter();
+                
+                controlEventBuffer.enqueue(controlIndex, ControlEvent::EventType::MOTION_TO_IDLE);
             }
         }
         else
@@ -85,8 +91,14 @@ void ADC_MUX::update(uint16_t sample)
         }
     }
     
-    pot.setPreviousValue();
+    if ((pot.getState() == Pot::Pot_t::IN_MOTION) && (value_difference != 0))
+    {
+		controlEventBuffer.enqueue(controlIndex, ControlEvent::EventType::VALUE_CHANGE, filteredValue);
+	}
+    
+    pot.setPreviousValue_Filtered(filteredValue);
 }
+
 uint8_t ADC_MUX::pinSelector(const uint8_t &index)
 {
     return signalPin[index > 15 ? 1 : 0];

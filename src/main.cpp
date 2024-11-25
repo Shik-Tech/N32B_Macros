@@ -6,8 +6,8 @@
 */
 
 #include "functions.h"
-#include <GlobalComponents/GlobalComponents.h>
-#include <FirmwareUpdate.h>
+#include "GlobalComponents/GlobalComponents.h"
+#include "FirmwareUpdate.h"
 #include <wiring_private.h>
 
 static void setDefaultPinFunction(uint8_t pin);
@@ -93,8 +93,6 @@ void setup()
     formatFactory();
   }
 
-  //muxFactory.init();
-
   // Load the last used preset as stored in EEPROM
   loadPreset(EEPROM.read(lastUsedPresetAddress));
 
@@ -125,17 +123,17 @@ void loop()
 {
   if (!isSuspended)
   {
-    for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
-    {
-      muxFactory.update(currentKnob);
-    }
-
     display.resetChanged();
-
-    for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
+    
+    while (true)
     {
-      updateKnob(currentKnob);
-    }
+		ControlEvent knobEvent = device.potsEventBuffer.dequeue();
+		
+		if (knobEvent.type == ControlEvent::EventType::NO_EVENT)
+			break;
+		
+		handleKnobEvent(knobEvent);
+	}
 
     doMidiRead();
 
