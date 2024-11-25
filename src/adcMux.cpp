@@ -56,7 +56,8 @@ void ADC_MUX::update(uint16_t sample)
     uint16_t filteredValue_EMA = FixedPoint_EMA(sensorRead, pot.getPreviousValue_EMA(), nAlphaShift);
     // Note: the resolution of filteredValue_EMA is (12 + nAlphaShift) bits.
     // By shifting it right by (12 + nAlphaShift - 14) bits, its resolution becomes 14 bits.
-    uint16_t filteredValue = constrain(map(filteredValue_EMA >> nDownShift, 24, 16367, 0, 16383), 0, 16383);
+    // uint16_t filteredValue = constrain(map(filteredValue_EMA >> nDownShift, 24, 16367, 0, 16383), 0, 16383);
+    uint16_t filteredValue = constrain(map(sample << 2, 24, 16367, 0, 16383), 0, 16383);
 
     pot.setCurrentValue(filteredValue);
     pot.setPreviousValue_EMA(filteredValue_EMA);
