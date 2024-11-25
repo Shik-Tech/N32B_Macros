@@ -108,7 +108,8 @@ public:
 		}
 		else
 		{
-			readEvent = { .type = ControlEvent::EventType::NO_EVENT };
+			// readEvent = { .type = ControlEvent::EventType::NO_EVENT };
+			readEvent.type = ControlEvent::EventType::NO_EVENT;
 		}
 		
 		return readEvent;
