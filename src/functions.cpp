@@ -126,7 +126,7 @@ void sendMidiMessage(uint8_t &index, bool force)
   scaleValuesByRange(value_14bit, knob.MAX_A, knob.MIN_A, &MSB);
   scaleValuesByRange(prev_value_14bit, knob.MAX_A, knob.MIN_A, &oldMSB);
 
-  if (mode == KNOB_MODE_HIRES)
+  if (mode == KNOB_MODE_HIRES || mode == KNOB_MODE_NRPN || mode == KNOB_MODE_RPN)
   {
     scaleValuesByRange(value_14bit, knob.MAX_A, knob.MIN_A, &LSB, true);
     scaleValuesByRange(prev_value_14bit, knob.MAX_A, knob.MIN_A, &oldLSB, true);
