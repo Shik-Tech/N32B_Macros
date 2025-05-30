@@ -19,12 +19,12 @@ void onUsbMessage(const midi::Message<128> &message)
       break;
 
     case THRU_USB_TRS:
-      MIDISerial1.send(message);
+      MIDISerial1.send(message.type, message.data1, message.data2, message.channel);
       break;
 
     case THRU_BOTH_DIRECTIONS:
       MIDIUSB.send(message.type, message.data1, message.data2, message.channel);
-      MIDISerial1.send(message);
+      MIDISerial1.send(message.type, message.data1, message.data2, message.channel);
       break;
     }
     display.blinkDot(2);
@@ -38,7 +38,7 @@ void onSerialMessage(const midi::Message<128> &message)
     switch (device.activePreset.thruMode)
     {
     case THRU_TRS_TRS:
-      MIDISerial1.send(message);
+      MIDISerial1.send(message.type, message.data1, message.data2, message.channel);
       break;
 
     case THRU_TRS_USB:
@@ -47,7 +47,7 @@ void onSerialMessage(const midi::Message<128> &message)
 
     case THRU_BOTH_DIRECTIONS:
       MIDIUSB.send(message.type, message.data1, message.data2, message.channel);
-      MIDISerial1.send(message);
+      MIDISerial1.send(message.type, message.data1, message.data2, message.channel);
       break;
     }
     display.blinkDot(2);
