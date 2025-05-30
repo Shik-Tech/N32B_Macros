@@ -2,7 +2,7 @@
   7-Segment LED Display Driver for the TLC59282
   MIT License
 
-  Copyright (c) 2024 SHIK
+  Copyright (c) 2025 SHIK
   Written by Guillaume Rosanis
 */
 

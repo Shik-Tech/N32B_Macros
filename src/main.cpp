@@ -2,7 +2,7 @@
   N32B Macros Firmware v4.x.x
   MIT License
 
-  Copyright (c) 2024 SHIK
+  Copyright (c) 2025 SHIK
 */
 
 #include "functions.h"
