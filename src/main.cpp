@@ -32,8 +32,9 @@ void setup()
   {
     bool buttonPressed = true;
     digitalWrite(LED_PIN, LOW);
+    const unsigned long start = millis();
 
-    while (millis() < reset_timeout) // Check if button has been released before timeout
+    while ((millis() - start) < reset_timeout)
     {
       if (digitalRead(BUTTON_A_PIN))
       {
@@ -76,7 +77,8 @@ void setup()
   muxFactory.init();
 
   // Load the last used preset as stored in EEPROM
-  loadPreset(EEPROM.read(lastUsedPresetAddress));
+  uint8_t lastPreset = EEPROM.read(lastUsedPresetAddress);
+  loadPreset(lastPreset < NUMBER_OF_PRESETS ? lastPreset : 0);
 
   /* Set callbacks */
   MIDIUSB.setHandleMessage(onUsbMessage);
@@ -120,6 +122,7 @@ void loop()
   display.clearDisplay();
 
 #ifdef N32Bv3
+  // 1ms settle after display SPI activity — display and ADC share Port B
   if (display.hasChanged())
     delayMicroseconds(1000);
 #endif

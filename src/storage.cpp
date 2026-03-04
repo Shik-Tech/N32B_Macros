@@ -14,7 +14,7 @@ bool isEEPROMvalid()
   for (uint8_t i = 3; i > 0; i--)
   {
     uint8_t byte = EEPROM.read(EEPROM.length() - i);
-    uint8_t versionDigit = pgm_read_word_near(firmwareVersion + i - 1);
+    uint8_t versionDigit = pgm_read_byte_near(firmwareVersion + i - 1);
     if (!(byte == versionDigit))
       return false;
   }
@@ -34,7 +34,7 @@ void formatFactory()
 #ifdef N32Bv3
     uint8_t indexId = i;
 #else
-    uint8_t indexId = pgm_read_word_near(knobsLocation + i);
+    uint8_t indexId = pgm_read_byte_near(knobsLocation + i);
 #endif
     defaultPreset.knobInfo[indexId].MSB = i;
     defaultPreset.knobInfo[indexId].LSB = i + 32;
@@ -61,7 +61,7 @@ void formatFactory()
   // we write the signature so that the device will never rewrite the factory presets
   for (uint8_t i = 3; i > 0; i--)
   {
-    uint8_t versionDigit = pgm_read_word_near(firmwareVersion + i - 1);
+    uint8_t versionDigit = pgm_read_byte_near(firmwareVersion + i - 1);
     EEPROM.update(EEPROM.length() - i, versionDigit);
   }
 }

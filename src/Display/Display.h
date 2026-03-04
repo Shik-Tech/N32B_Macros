@@ -64,4 +64,5 @@ private:
   unsigned long displayOffTimer;
   unsigned long lastUpdateTime;
   int8_t activeKnobIndex = -1;
+  bool displayCleared = false;
 };

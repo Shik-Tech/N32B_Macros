@@ -19,7 +19,11 @@ void Display::clearDisplay(uint16_t readInterval)
     {
         clear();
 #ifdef N32Bv3
-        flush();
+        if (!displayCleared)
+        {
+            flush();
+            displayCleared = true;
+        }
 #endif
     }
 }
@@ -44,12 +48,13 @@ void Display::showValue(uint8_t value, uint8_t index)
         write(1, chars[value % 10] | B10000000);
     }
     displayOffTimer = millis();
+    displayCleared = false;
 #else
     setNumber(value);
     flush();
 
-    // lastUpdateTime = millis();
     displayOffTimer = millis();
+    displayCleared = false;
 #endif
 }
 
@@ -60,6 +65,7 @@ void Display::blinkDot(uint8_t dotSide)
     clear();
     write(dotSide, B10000000);
     displayOffTimer = millis();
+    displayCleared = false;
 }
 #else
 void Display::blinkDot(uint8_t nDigit)
@@ -68,6 +74,7 @@ void Display::blinkDot(uint8_t nDigit)
     flush();
 
     displayOffTimer = millis();
+    displayCleared = false;
 }
 #endif
 
@@ -82,6 +89,7 @@ void Display::showChannelNumber(uint8_t channelNumber)
     flush();
 #endif
     displayOffTimer = millis();
+    displayCleared = false;
 }
 
 void Display::showPresetNumber(uint8_t presetNumber)
@@ -96,6 +104,7 @@ void Display::showPresetNumber(uint8_t presetNumber)
     flush();
 #endif
     displayOffTimer = millis();
+    displayCleared = false;
 }
 
 void Display::showStartUpAnimation()
@@ -199,6 +208,7 @@ void Display::showStartUpAnimation()
     flush();
 #endif
     displayOffTimer = millis();
+    displayCleared = false;
 }
 
 // Show animation after factory reset (infinity symbol animation)
@@ -334,6 +344,7 @@ void Display::showSaveMessage()
         bDecimalPoint = !bDecimalPoint;
     }
 #endif
+    displayCleared = false;
 }
 
 void Display::showSynching()
@@ -354,6 +365,7 @@ void Display::showSynching()
     delay(1000);
 
 #endif
+    displayCleared = false;
 }
 
 int8_t Display::getActiveKnobIndex()
