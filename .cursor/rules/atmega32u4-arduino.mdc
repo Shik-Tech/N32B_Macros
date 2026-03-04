@@ -1,0 +1,80 @@
+---
+description: Current platform context — ATmega32U4 + Arduino + PlatformIO
+globs: 
+alwaysApply: true
+---
+
+## Platform context (do not ask about these)
+
+- **MCU**: ATmega32U4 (8-bit AVR) @ 16 MHz, 32 KB flash (28 KB usable after Caterina bootloader), 2.5 KB RAM, 1 KB internal EEPROM.
+- **Board**: Custom `N32B` and `N32Bv3` (Leonardo variant).
+- **Framework**: Arduino (`atmelavr` platform), PlatformIO, `-Os`.
+- **Architecture**: Bare-metal superloop (`setup()` / `loop()`). Not FreeRTOS, not a cooperative scheduler.
+- **Storage**: Internal EEPROM (1 KB) via `<EEPROM.h>`. Byte-level read/write with `EEPROM.read()` / `EEPROM.update()`.
+
+## Peripherals in use
+
+| Bus | Usage |
+|-----|-------|
+| Bit-bang SPI | N32B: MAX7219 7-segment LED display (`DigitLedDisplay`, pins DIN/CS/CLK) |
+| Bit-bang SPI | N32Bv3: TLC59282 7-segment LED display (`TLC59282_Display`, pins SIN/SCLK/LAT/BLANK) |
+| UART | MIDI Serial x1 (`MIDISerial1` on `Serial1`) |
+| USB | USB-MIDI (`USB-MIDI` library), native USB on ATmega32U4 |
+| ADC | 32 analog inputs (knobs/pots) via 2x 16-channel analog multiplexers, polled with `analogRead()` |
+| GPIO | 2 buttons (A3, A2, INPUT_PULLUP), 1 LED (pin 17), 4 mux select lines |
+
+No I2C. No CAN. No external EEPROM.
+
+## ADC subsystem
+
+- Polled in the main loop: `ADC_MUX::update()` iterates all 32 inputs sequentially each `loop()` cycle.
+- `analogRead()` with 50 µs mux settling delay per channel.
+- 10-bit native resolution, scaled to 14-bit domain (0–16383) for MIDI processing (NRPN/RPN/14-bit modes).
+- Fixed-point exponential moving average (EMA) filter.
+- Idle/in-motion state machine per pot with configurable thresholds and release counter.
+
+## Real-time constraints
+
+- All ADC reads and MIDI sends happen in the main loop — no ISR-based ADC on this platform.
+- MIDI reading is polled (`doMidiRead()`), not timer-driven.
+- Display updates happen in the main loop — soft deadline.
+- 32 × `analogRead()` + mux settling dominates loop time (~5–6 ms per full scan).
+
+## Timing
+
+- No hardware cycle counter on ATmega32U4.
+- `millis()` wraps at ~49.7 days — rarely an issue but be aware.
+- `micros()` resolution is 4 µs on 16 MHz AVR.
+- Use `millis()` for elapsed-time measurements; handle wraparound via unsigned subtraction.
+
+## Memory constraints
+
+- **2.5 KB RAM** — extremely tight. `Preset_t` is ~289 bytes; `Device_t` with 32 `Pot` objects is a significant portion of RAM.
+- `ArduinoSTL` provides `<vector>` and `<bitset>` — used sparingly, beware heap fragmentation.
+- `PROGMEM` for constant data (`firmwareVersion`, `knobsLocation`). Use `pgm_read_*` to access.
+- EEPROM layout: byte 0 = last used preset, then `NUMBER_OF_PRESETS` × `sizeof(Preset_t)` contiguous, firmware signature at end.
+
+## Arduino-specific anti-patterns
+
+- **`delay()` / `delayMicroseconds()`**: Acceptable only during one-time init sequences. Never in the main loop (except the 50 µs mux settle and N32Bv3 display timing which are established patterns).
+- **`digitalRead()` / `digitalWrite()`**: Used for mux select lines and buttons — acceptable given the polling architecture.
+- **`String` class**: Never use. Use C-style char arrays.
+- **Dynamic allocation**: Minimize. The ArduinoSTL `vector` usage should not grow at runtime.
+
+## Board variants
+
+- `N32B` — Original board. MAX7219 display driver (`DigitLedDisplay`). Mux select on pins 2–5. Non-sequential knob-to-index mapping via `knobsLocation[]` PROGMEM table.
+- `N32Bv3` — V3 board (`-DN32Bv3` build flag). TLC59282 display driver (`TLC59282_Display`). Mux select on pins 4–7. Sequential knob indexing. Additional display pins (BLANK).
+
+## Build environments
+
+- `N32B` — Original board build (default).
+- `N32Bv3` — V3 board build (`-DN32Bv3`).
+
+## Libraries
+
+- `ArduinoSTL` — STL containers for AVR.
+- `USB-MIDI` — USB MIDI transport (lathoub).
+- `DigitLedDisplay` — MAX7219 driver (N32B only).
+- `TLC59282_Display` — Custom TLC59282 driver in `lib/` (N32Bv3 only).
+- `ezButton` — Button debouncing.

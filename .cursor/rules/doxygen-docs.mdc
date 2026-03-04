@@ -1,0 +1,58 @@
+---
+description: Doxygen documentation conventions for all source files
+globs: 
+alwaysApply: true
+---
+
+## Doxygen documentation policy
+
+Every public function, method, and non-trivial type declared in a header file **must** have a Doxygen comment block.
+
+### When to add or update
+
+- **New public function/method/class/struct/enum** in a header: add a `/** */` block above it before the PR is complete.
+- **Signature or behavior change** to an existing symbol: update the Doxygen comment to match (params, return, notes).
+- **Deleted symbol**: remove the orphaned doc block.
+
+### Comment style
+
+- Use Javadoc-style `/** ... */` blocks in **header files only**.
+- The first sentence is the brief (enabled by `JAVADOC_AUTOBRIEF`).
+- Use `@param`, `@return`, `@note` **only when not obvious** from name and type.
+- Trivial getters/setters: single-line `/** Brief. */` is sufficient.
+- Do **not** duplicate documentation in `.cpp` files.
+
+### Embedded context annotations
+
+Use `@note` for information a caller must know:
+
+- ISR safety: `@note ISR-safe.` or `@note Not ISR-safe — call from main loop only.`
+- Blocking behavior: `@note Blocks for at most N ms.`
+- Caller constraints: `@note Must be called after init().`
+- Timing: `@note Worst-case ~X µs on SAMD21 @ 48 MHz.`
+
+### Template
+
+```cpp
+/**
+ * Brief one-line description.
+ *
+ * Optional longer description for non-trivial logic.
+ *
+ * @param paramName Description.
+ * @return Description.
+ *
+ * @note Call from main loop only.
+ */
+```
+
+### Enums and structs
+
+- Add a `/** Brief. */` above the type definition.
+- Document individual enumerators or fields only when their meaning is not obvious from the name.
+
+### What NOT to do
+
+- Do not add `@brief` — `JAVADOC_AUTOBRIEF` extracts it automatically.
+- Do not document private helper methods unless they contain non-obvious logic.
+- Do not write paragraph-length descriptions for simple wrappers.
