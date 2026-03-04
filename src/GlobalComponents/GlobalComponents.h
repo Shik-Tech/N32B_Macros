@@ -10,7 +10,6 @@
 #include <USB-MIDI.h>
 #include <MidiInterfaces/MidiInterfaces.h>
 #include <Display/Display.h>
-#include <adcMux.h>
 
 // MIDI Interfaces
 #define MIDIUSB MidiUSBInterface::getInstance()
@@ -19,4 +18,9 @@
 // Display
 #define display Display::getInstance()
 
+/**
+ * Polls both MIDI interfaces (USB and Serial1) for incoming messages.
+ *
+ * @note Call from main loop only — not ISR-safe.
+ */
 void doMidiRead();

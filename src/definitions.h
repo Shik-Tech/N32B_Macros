@@ -19,6 +19,8 @@ constexpr uint8_t threshold_idle_to_motion = 4;
 #endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
+constexpr uint8_t INTERFACE_SYSEX_MAX_LENGTH = 64;
+
 const uint8_t firmwareVersion[] PROGMEM = {4, 5, 6};
 
 #define LONG_PRESS_THRESHOLD 1000

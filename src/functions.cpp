@@ -54,7 +54,7 @@ void onSerialMessage(const midi::Message<128> &message)
   }
 }
 
-void updateKnob(uint8_t &index, bool force)
+void updateKnob(uint8_t index, bool force)
 {
   Pot &pot = device.pots[index];
   Pot_t::State potState = pot.getState();
@@ -76,7 +76,7 @@ void invertValue(uint8_t properties, uint8_t invertIndex, uint8_t &max, uint8_t 
     *value = max - (*value - min);
   }
 }
-void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataByte *outputValue, bool isLSB = false)
+void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataByte *outputValue, bool isLSB)
 {
   // Define the total range based on the min and max settings
   uint16_t range = max - min + 1;
@@ -101,7 +101,7 @@ void scaleValuesByRange(uint16_t value, uint8_t &max, uint8_t &min, midi::DataBy
   }
 }
 
-void sendMidiMessage(uint8_t &index, bool force)
+void sendMidiMessage(uint8_t index, bool force)
 {
   Knob_t &knob = device.activePreset.knobInfo[index];
   Pot &pot = device.pots[index];
@@ -422,12 +422,6 @@ void handleButtons()
     device.buttonBState = BUTTON_IDLE;
   }
 }
-
-// void doMidiRead()
-// {
-//   MIDISerial1.read();
-//   MIDIUSB.read();
-// }
 
 void extractMode(uint8_t properties, uint8_t *mode)
 {
