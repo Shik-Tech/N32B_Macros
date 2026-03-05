@@ -9,9 +9,6 @@
 
 #include <Arduino.h>
 #include "adcMux.h"
-#include "sysex.h"
-
-USING_NAMESPACE_MIDI;
 
 extern Device_t device;
 extern ADC_MUX muxFactory;

@@ -8,7 +8,6 @@
 #pragma once
 
 #include <Arduino.h>
-// #include "definitions.h"
 
 struct Pot_t
 {
@@ -40,10 +39,10 @@ public:
     void increaseReleaseCounter() { potData.release_counter++; }
 
     // Getters
-    Pot_t::State &getState() { return potData.state; }
-    uint16_t &getCurrentValue() { return potData.current_value; }
-    uint16_t &getPreviousValue() { return potData.previous_value; }
-    uint8_t &getReleaseCounter() { return potData.release_counter; }
+    Pot_t::State getState() const { return potData.state; }
+    uint16_t getCurrentValue() const { return potData.current_value; }
+    uint16_t getPreviousValue() const { return potData.previous_value; }
+    uint8_t getReleaseCounter() const { return potData.release_counter; }
 
 private:
     Pot_t potData;

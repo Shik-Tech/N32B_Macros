@@ -6,6 +6,7 @@
 */
 
 #include "functions.h"
+#include "sysex.h"
 #include <GlobalComponents/GlobalComponents.h>
 
 void setup()

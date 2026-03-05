@@ -9,7 +9,7 @@
 
 #include <Arduino.h>
 #include <USB-MIDI.h>
-#include <Pot.h>
+#include "Pot.h"
 
 constexpr uint8_t threshold_idle_to_motion = 4;
 constexpr uint8_t threshold_motion_to_idle = 16;
