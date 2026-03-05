@@ -8,7 +8,8 @@
 #include "Display.h"
 
 #ifndef N32Bv3
-const static byte chars[] = {
+#include <avr/pgmspace.h>
+static const uint8_t chars[] PROGMEM = {
     B01111110, B00110000, B01101101, B01111001, B00110011, B01011011, B01011111, B01110000, B01111111, B01111011};
 #endif
 
@@ -25,6 +26,7 @@ void Display::clearDisplay(uint16_t readInterval)
             displayCleared = true;
         }
 #endif
+        displayOffTimer = millis();
     }
 }
 
@@ -45,7 +47,7 @@ void Display::showValue(uint8_t value, uint8_t index)
     printDigit(value);
     if (value > 99)
     {
-        write(1, chars[value % 10] | B10000000);
+        write(1, pgm_read_byte(&chars[value % 10]) | B10000000);
     }
     displayOffTimer = millis();
     displayCleared = false;
