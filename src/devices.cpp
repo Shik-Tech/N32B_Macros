@@ -9,4 +9,4 @@
 
 /* Device setup data */
 Device_t device;
-ADC_MUX muxFactory(device.pots);
+ADC_MUX adcMux(device.pots);

@@ -11,4 +11,4 @@
 #include "adcMux.h"
 
 extern Device_t device;
-extern ADC_MUX muxFactory;
+extern ADC_MUX adcMux;

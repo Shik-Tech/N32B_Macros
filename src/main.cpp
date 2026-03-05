@@ -75,7 +75,7 @@ void setup()
     formatFactory();
   }
 
-  muxFactory.init();
+  adcMux.init();
 
   // Load the last used preset as stored in EEPROM
   uint8_t lastPreset = EEPROM.read(lastUsedPresetAddress);
@@ -105,7 +105,7 @@ void loop()
 {
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
-    muxFactory.update(currentKnob);
+    adcMux.update(currentKnob);
   }
 
 #ifdef N32Bv3

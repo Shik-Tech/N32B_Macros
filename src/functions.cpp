@@ -332,7 +332,7 @@ void sendSnapshot()
   display.showSynching();
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
   {
-    muxFactory.update(currentKnob, true);
+    adcMux.update(currentKnob, true);
   }
 
   for (uint8_t currentKnob = 0; currentKnob < NUMBER_OF_KNOBS; currentKnob++)
