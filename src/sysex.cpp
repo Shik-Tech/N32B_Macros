@@ -6,49 +6,58 @@
 */
 
 #include "sysex.h"
+#include "functions.h"
 #include <GlobalComponents/GlobalComponents.h>
 
 void processSysex(unsigned char *data, unsigned int size)
 {
-    if (size > 3 && data[MANUFACTURER_INDEX] == SHIK_MANUFACTURER_ID)
+    if (size < kSysexMinSize_NoPayload || data[MANUFACTURER_INDEX] != SHIK_MANUFACTURER_ID)
+        return;
+
+    switch (data[COMMAND_INDEX])
     {
-        switch (data[COMMAND_INDEX])
+    case SET_KNOB_MODE:
+        if (size >= kSysexMinSize_SET_KNOB_MODE && data[KNOB_INDEX] < NUMBER_OF_KNOBS)
         {
-        case SET_KNOB_MODE:
-            device.activePreset.knobInfo[data[KNOB_INDEX]].MSB = data[MSB_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].LSB = data[LSB_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].MIN_A = data[MIN_A_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].MAX_A = data[MAX_A_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].MIN_B = data[MIN_B_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].MAX_B = data[MAX_B_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].CHANNELS = (data[CHANNEL_A_INDEX] << 4) | data[CHANNEL_B_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].OUTPUTS = (data[OUTPUT_A_INDEX] << 2) | data[OUTPUT_B_INDEX];
-            device.activePreset.knobInfo[data[KNOB_INDEX]].PROPERTIES = (data[KNOB_MODE_INDEX] << 4) | data[PROPERTIES_INDEX];
-            break;
-        case SET_THRU_MODE:
-            setMidiThruMode(data[KNOB_INDEX]);
-            break;
-        case SAVE_PRESET:
-            savePreset(data[KNOB_INDEX]);
-            break;
-        case LOAD_PRESET:
-            loadPreset(data[KNOB_INDEX]);
-            break;
-        case CHANGE_CHANNEL:
-            handleChangeChannel(data[KNOB_INDEX]);
-            break;
-        case SEND_FIRMWARE_VERSION:
-            sendDeviceFirmwareVersion();
-            break;
-        case SYNC_KNOBS:
-            sendActivePreset();
-            break;
-        case SEND_SNAPSHOT:
-            sendSnapshot();
-            break;
-        default:
-            break;
+            const uint8_t k = data[KNOB_INDEX];
+            device.activePreset.knobInfo[k].MSB = data[MSB_INDEX];
+            device.activePreset.knobInfo[k].LSB = data[LSB_INDEX];
+            device.activePreset.knobInfo[k].MIN_A = data[MIN_A_INDEX];
+            device.activePreset.knobInfo[k].MAX_A = data[MAX_A_INDEX];
+            device.activePreset.knobInfo[k].MIN_B = data[MIN_B_INDEX];
+            device.activePreset.knobInfo[k].MAX_B = data[MAX_B_INDEX];
+            device.activePreset.knobInfo[k].CHANNELS = (data[CHANNEL_A_INDEX] << 4) | data[CHANNEL_B_INDEX];
+            device.activePreset.knobInfo[k].OUTPUTS = (data[OUTPUT_A_INDEX] << 2) | data[OUTPUT_B_INDEX];
+            device.activePreset.knobInfo[k].PROPERTIES = (data[KNOB_MODE_INDEX] << 4) | data[PROPERTIES_INDEX];
         }
+        break;
+    case SET_THRU_MODE:
+        if (size >= kSysexMinSize_PresetOrThruOrChannel)
+            setMidiThruMode(data[KNOB_INDEX]);
+        break;
+    case SAVE_PRESET:
+        if (size >= kSysexMinSize_PresetOrThruOrChannel && data[KNOB_INDEX] < NUMBER_OF_PRESETS)
+            savePreset(data[KNOB_INDEX]);
+        break;
+    case LOAD_PRESET:
+        if (size >= kSysexMinSize_PresetOrThruOrChannel && data[KNOB_INDEX] < NUMBER_OF_PRESETS)
+            loadPreset(data[KNOB_INDEX]);
+        break;
+    case CHANGE_CHANNEL:
+        if (size >= kSysexMinSize_PresetOrThruOrChannel)
+            handleChangeChannel(data[KNOB_INDEX]);
+        break;
+    case SEND_FIRMWARE_VERSION:
+        sendDeviceFirmwareVersion();
+        break;
+    case SYNC_KNOBS:
+        sendActivePreset();
+        break;
+    case SEND_SNAPSHOT:
+        sendSnapshot();
+        break;
+    default:
+        break;
     }
 }
 
@@ -60,13 +69,11 @@ void handleChangeChannel(byte channel)
     }
 }
 
-// Change preset on program change
 void handleProgramChange(byte channel, byte number)
 {
+    (void)channel;
     if (number < NUMBER_OF_PRESETS)
-    {
         loadPreset(number);
-    }
 }
 
 void sendDeviceFirmwareVersion()
@@ -83,61 +90,38 @@ void sendDeviceFirmwareVersion()
 }
 void sendActivePreset()
 {
-    // Send current preset
     for (uint8_t i = 0; i < NUMBER_OF_KNOBS; i++)
     {
 #ifdef N32Bv3
-        uint8_t channel_a = device.activePreset.knobInfo[i].CHANNELS >> 4;
-        uint8_t channel_b = device.activePreset.knobInfo[i].CHANNELS & 0xF;
-        uint8_t output_a = device.activePreset.knobInfo[i].OUTPUTS >> 2;
-        uint8_t output_b = device.activePreset.knobInfo[i].OUTPUTS & 0x3;
-        uint8_t properties = device.activePreset.knobInfo[i].PROPERTIES & 0xF;
-        uint8_t mode = device.activePreset.knobInfo[i].PROPERTIES >> 4;
-        uint8_t knobsData[15] = {
-            SHIK_MANUFACTURER_ID,
-            SYNC_KNOBS,
-            i,
-            device.activePreset.knobInfo[i].MSB,
-            device.activePreset.knobInfo[i].LSB,
-            channel_a,
-            channel_b,
-            output_a,
-            output_b,
-            device.activePreset.knobInfo[i].MIN_A,
-            device.activePreset.knobInfo[i].MAX_A,
-            device.activePreset.knobInfo[i].MIN_B,
-            device.activePreset.knobInfo[i].MAX_B,
-            properties,
-            mode};
-        MIDIUSB.sendSysEx(15, knobsData);
-        MIDISerial1.sendSysEx(15, knobsData);
+        const uint8_t indexId = i;
 #else
-        uint8_t indexId = pgm_read_byte_near(knobsLocation + i);
-        uint8_t channel_a = device.activePreset.knobInfo[indexId].CHANNELS >> 4;
-        uint8_t channel_b = device.activePreset.knobInfo[indexId].CHANNELS & 0xF;
-        uint8_t output_a = device.activePreset.knobInfo[indexId].OUTPUTS >> 2;
-        uint8_t output_b = device.activePreset.knobInfo[indexId].OUTPUTS & 0x3;
-        uint8_t properties = device.activePreset.knobInfo[indexId].PROPERTIES & 0xF;
-        uint8_t mode = device.activePreset.knobInfo[indexId].PROPERTIES >> 4;
+        const uint8_t indexId = pgm_read_byte_near(knobsLocation + i);
+#endif
+        const Knob_t &knob = device.activePreset.knobInfo[indexId];
+        uint8_t channel_a = knob.CHANNELS >> 4;
+        uint8_t channel_b = knob.CHANNELS & 0xF;
+        uint8_t output_a = knob.OUTPUTS >> 2;
+        uint8_t output_b = knob.OUTPUTS & 0x3;
+        uint8_t properties = knob.PROPERTIES & 0xF;
+        uint8_t mode = knob.PROPERTIES >> 4;
         uint8_t knobsData[15] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
-            pgm_read_byte_near(knobsLocation + i),
-            device.activePreset.knobInfo[indexId].MSB,
-            device.activePreset.knobInfo[indexId].LSB,
+            indexId,
+            knob.MSB,
+            knob.LSB,
             channel_a,
             channel_b,
             output_a,
             output_b,
-            device.activePreset.knobInfo[indexId].MIN_A,
-            device.activePreset.knobInfo[indexId].MAX_A,
-            device.activePreset.knobInfo[indexId].MIN_B,
-            device.activePreset.knobInfo[indexId].MAX_B,
+            knob.MIN_A,
+            knob.MAX_A,
+            knob.MIN_B,
+            knob.MAX_B,
             properties,
             mode};
         MIDIUSB.sendSysEx(15, knobsData);
         MIDISerial1.sendSysEx(15, knobsData);
-#endif
     }
 
     uint8_t presetThruData[3] = {
@@ -157,5 +141,6 @@ void sendActivePreset()
 }
 void setMidiThruMode(byte mode)
 {
-    device.activePreset.thruMode = mode;
+    if (mode <= THRU_BOTH_DIRECTIONS)
+        device.activePreset.thruMode = mode;
 }

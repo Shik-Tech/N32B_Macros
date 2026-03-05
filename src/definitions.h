@@ -83,6 +83,13 @@ enum ButtonState
   BUTTON_LONG_PRESSED
 };
 
+/** Minimum SysEx size for SET_KNOB_MODE (indices 1..15). */
+constexpr uint8_t kSysexMinSize_SET_KNOB_MODE = 16;
+/** Minimum SysEx size for preset/thru/channel commands (indices 1..3). */
+constexpr uint8_t kSysexMinSize_PresetOrThruOrChannel = 4;
+/** Minimum SysEx size for commands with no payload (indices 1..2). */
+constexpr uint8_t kSysexMinSize_NoPayload = 3;
+
 /** SysEx / command payload byte indices. */
 enum COMMANDS_INDEXES : uint8_t
 {
