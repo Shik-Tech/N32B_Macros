@@ -14,7 +14,7 @@
 #endif
 
 #include <Arduino.h>
-#include <definitions.h>
+#include "definitions.h"
 
 /** 7-segment display singleton for knob values, channel, preset, and status messages. */
 #ifndef N32Bv3

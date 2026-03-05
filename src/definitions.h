@@ -9,14 +9,9 @@
 
 #include <Arduino.h>
 #include <USB-MIDI.h>
-#include <vector>
 #include <Pot.h>
 
-#ifndef N32Bv3
 constexpr uint8_t threshold_idle_to_motion = 4;
-#else
-constexpr uint8_t threshold_idle_to_motion = 4;
-#endif
 constexpr uint8_t threshold_motion_to_idle = 16;
 
 constexpr uint8_t INTERFACE_SYSEX_MAX_LENGTH = 64;
@@ -29,7 +24,7 @@ const uint8_t firmwareVersion[] PROGMEM = {4, 5, 6};
 // byte index in EEPROM for the last used preset
 #define lastUsedPresetAddress 0
 
-// Pin setup
+/** GPIO pin assignments. N32Bv3 uses TLC59282 display pins; N32B uses MAX7219. */
 #ifdef N32Bv3
 enum PinIndices : uint8_t
 {
@@ -67,14 +62,14 @@ enum PinIndices : uint8_t
 };
 #endif
 
-// Button Modes
+/** UI mode: channel selection or preset selection. */
 enum Mode
 {
   CHANNEL_SELECT,
   PRESET_SELECT
 };
 
-// Button States
+/** Button state machine states. */
 enum ButtonState
 {
   BUTTON_IDLE,
@@ -82,7 +77,8 @@ enum ButtonState
   BUTTON_LONG_PRESSED
 };
 
-enum COMMANDS_INDEXS : uint8_t
+/** SysEx / command payload byte indices. */
+enum COMMANDS_INDEXES : uint8_t
 {
   MANUFACTURER_INDEX = 1,
   COMMAND_INDEX,
@@ -101,6 +97,7 @@ enum COMMANDS_INDEXS : uint8_t
   KNOB_MODE_INDEX
 };
 
+/** SysEx command IDs. */
 enum COMMANDS : uint8_t
 {
   SET_KNOB_MODE = 1,         // Define knob mode (see KNOB_MODES)
@@ -109,12 +106,12 @@ enum COMMANDS : uint8_t
   SEND_FIRMWARE_VERSION = 4, // Send the device firmware version
   SYNC_KNOBS = 5,            // Send active preset
   CHANGE_CHANNEL = 6,        // Changes the global MIDI channel
-  // START_SYSEX_MESSAGE = 7,   // Announce start of sysEx mesasge
   SET_THRU_MODE = 8,         // Set the midi THRU behavior
-  SEND_SNAPSHOT = 9,         // Set the midi THRU behavior
+  SEND_SNAPSHOT = 9,         // Send snapshot of current state
   END_OF_TRANSMISSION = 99   // Notify end of transmission
 };
 
+/** Knob MIDI output mode (CC, NRPN, RPN, etc.). */
 enum KNOB_MODES : uint8_t
 {
   KNOB_MODE_DISABLE = 0,
@@ -128,7 +125,7 @@ enum KNOB_MODES : uint8_t
   KNOB_MODE_POLY_AFTER_TOUCH = 8
 };
 
-// General definitions
+/** Device constants (manufacturer ID, knob count, preset count). */
 enum DEFINITIONS : uint8_t
 {
   SHIK_MANUFACTURER_ID = 32,
@@ -136,6 +133,7 @@ enum DEFINITIONS : uint8_t
   NUMBER_OF_PRESETS = 3
 };
 
+/** Bit indices for Knob_t::PROPERTIES (invert, use own channel). */
 enum PROPERTIES : uint8_t
 {
   INVERT_A_PROPERTY = 0,
@@ -144,12 +142,7 @@ enum PROPERTIES : uint8_t
   USE_OWN_CHANNEL_B_PROPERTY = 3
 };
 
-enum CHANNEL_NAMES : uint8_t
-{
-  CHANNEL_A = 1,
-  CHANNEL_B = 0
-};
-
+/** MIDI THRU routing (TRS/USB directions). */
 enum THRU_MODES : uint8_t
 {
   THRU_OFF = 0,
@@ -160,6 +153,7 @@ enum THRU_MODES : uint8_t
   THRU_BOTH_DIRECTIONS = 5
 };
 
+/** Per-macro output selection (TRS, USB, both). */
 enum OUTPUT_MODES : uint8_t
 {
   OUTPUT_OFF = 0,
@@ -168,8 +162,7 @@ enum OUTPUT_MODES : uint8_t
   OUTPUT_BOTH
 };
 
-// Knob settings structure
-
+/** Per-knob MIDI mapping and settings. */
 struct Knob_t
 {
   uint8_t MSB;
@@ -182,30 +175,24 @@ struct Knob_t
   uint8_t CHANNELS; // MSB 4-bit for Channel A, LSB 4-bit for Channel B
   uint8_t PROPERTIES;
   // Using PROPERTIES to reduce storage size.
-  // Bits are used as boolean values for inverts and use own channel:
-  // 0 - Invert A
-  // 2 - Invert B
-  // 3 - Use own channel A
-  // 4 - Use own channel B
-
-  // Knob mode is defined with 4 bits and need to be shifted to the right to calculate it's value:
-  // 4-7 - Mode value
+  // Bits 0-3: 0 - Invert A, 1 - Invert B, 2 - Use own channel A, 3 - Use own channel B.
+  // Bits 4-7: Mode value (shift right to extract).
 };
 
-// A preset struct is defining the device preset structure
+/** Preset: 32 knob configs plus THRU mode. */
 struct Preset_t
 {
   Knob_t knobInfo[32];
   uint8_t thruMode;
 };
 
-// A device struct is defining the device structure
+/** Global device state: active preset, pots, UI, buttons. */
 struct Device_t
 {
   Preset_t activePreset{0};
   Pot pots[NUMBER_OF_KNOBS];
   midi::Channel globalChannel{1};
-  byte currentPresetIndex{0};
+  uint8_t currentPresetIndex{0};
   Mode currentMode = CHANNEL_SELECT;
   ButtonState buttonAState = BUTTON_IDLE;
   ButtonState buttonBState = BUTTON_IDLE;
