@@ -14,6 +14,11 @@
 constexpr uint8_t threshold_idle_to_motion = 4;
 constexpr uint8_t threshold_motion_to_idle = 16;
 
+/** ADC map() input range for 14-bit scaling (empirical calibration). */
+constexpr uint16_t kAdcMapInMin = 44;
+constexpr uint16_t kAdcMapInMax = 16338;
+constexpr uint16_t kAdc14BitMax = 16383;
+
 constexpr uint8_t INTERFACE_SYSEX_MAX_LENGTH = 64;
 
 const uint8_t firmwareVersion[] PROGMEM = {4, 5, 6};

@@ -16,8 +16,10 @@ void ADC_MUX::init()
         pinMode(channels[i], OUTPUT);
     }
 
-    pinMode(MUX_A_SIG, INPUT);
-    pinMode(MUX_B_SIG, INPUT);
+    for (uint8_t i = 0; i < 2; i++)
+    {
+        pinMode(signalPin[i], INPUT);
+    }
 }
 
 uint16_t ADC_MUX::FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t nAlphaShift)
@@ -25,17 +27,21 @@ uint16_t ADC_MUX::FixedPoint_EMA(uint16_t nSample, uint16_t nPrevValue, uint8_t 
     return (uint16_t)(nPrevValue + nSample - (nPrevValue >> nAlphaShift));
 }
 
-void ADC_MUX::update(const uint8_t &index, bool force)
+void ADC_MUX::update(uint8_t index, bool force)
 {
+    constexpr uint8_t kEmaAlphaShift = 3;
+    constexpr uint8_t kReleaseCountThreshold = 3;
+
     setMultiplexer(index);
     delayMicroseconds(50);
     const uint16_t sensorRead = read(index);
 
     Pot &pot = pots[index];
 
-    uint16_t filteredValue = FixedPoint_EMA(sensorRead, pot.getPreviousValue() >> 1, 3) << 1;
+    // EMA: prev (14-bit>>1) + raw (10-bit) - prev/8; result <<1 then map to 14-bit
+    uint16_t filteredValue = FixedPoint_EMA(sensorRead, pot.getPreviousValue() >> 1, kEmaAlphaShift) << 1;
 
-    filteredValue = constrain(map(filteredValue, 44, 16338, 0, 16383), 0, 16383);
+    filteredValue = constrain(map(filteredValue, kAdcMapInMin, kAdcMapInMax, 0, kAdc14BitMax), 0, kAdc14BitMax);
     pot.setCurrentValue(filteredValue);
 
     uint16_t value_difference = (filteredValue >= pot.getPreviousValue()) ? (filteredValue - pot.getPreviousValue()) : (pot.getPreviousValue() - filteredValue);
@@ -53,7 +59,7 @@ void ADC_MUX::update(const uint8_t &index, bool force)
         if (value_difference < threshold_motion_to_idle)
         {
             pot.increaseReleaseCounter();
-            if (pot.getReleaseCounter() > 3)
+            if (pot.getReleaseCounter() > kReleaseCountThreshold)
             {
                 pot.setState(Pot_t::IDLE);
                 pot.resetReleaseCounter();
@@ -66,17 +72,17 @@ void ADC_MUX::update(const uint8_t &index, bool force)
     }
 }
 
-uint8_t ADC_MUX::pinSelector(const uint8_t &index)
+uint8_t ADC_MUX::pinSelector(uint8_t index)
 {
     return signalPin[index > 15 ? 1 : 0];
 }
 
-uint16_t ADC_MUX::read(const uint8_t &index)
+uint16_t ADC_MUX::read(uint8_t index)
 {
     return analogRead(pinSelector(index));
 }
 
-void ADC_MUX::setMultiplexer(const uint8_t &index)
+void ADC_MUX::setMultiplexer(uint8_t index)
 {
     for (uint8_t i = 0; i < 4; i++)
     {
