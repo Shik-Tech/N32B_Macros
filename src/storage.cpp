@@ -6,12 +6,14 @@
 */
 
 #include "storage.h"
+#include "devices.h"
 #include <GlobalComponents/GlobalComponents.h>
 
-// Check device version
 bool isEEPROMvalid()
 {
-  for (uint8_t i = 3; i > 0; i--)
+  if (EEPROM.length() < kFirmwareSignatureLen)
+    return false;
+  for (uint8_t i = kFirmwareSignatureLen; i > 0; i--)
   {
     uint8_t byte = EEPROM.read(EEPROM.length() - i);
     uint8_t versionDigit = pgm_read_byte_near(firmwareVersion + i - 1);
@@ -59,7 +61,7 @@ void formatFactory()
   }
 
   // we write the signature so that the device will never rewrite the factory presets
-  for (uint8_t i = 3; i > 0; i--)
+  for (uint8_t i = kFirmwareSignatureLen; i > 0; i--)
   {
     uint8_t versionDigit = pgm_read_byte_near(firmwareVersion + i - 1);
     EEPROM.update(EEPROM.length() - i, versionDigit);
@@ -81,10 +83,6 @@ void loadPreset(uint8_t presetNumber)
     // Update the last used preset
     device.currentPresetIndex = presetNumber;
     display.showPresetNumber(presetNumber);
-
-    // Save current preset as the active preset.
-    // Is commented out to prevent EEPROM from over used
-    // EEPROM.update(lastUsedPresetAddress, currentPresetNumber);
   }
 }
 

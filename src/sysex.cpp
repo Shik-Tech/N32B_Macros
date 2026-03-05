@@ -112,7 +112,7 @@ void sendActivePreset()
         MIDIUSB.sendSysEx(15, knobsData);
         MIDISerial1.sendSysEx(15, knobsData);
 #else
-        uint8_t indexId = pgm_read_word_near(knobsLocation + i);
+        uint8_t indexId = pgm_read_byte_near(knobsLocation + i);
         uint8_t channel_a = device.activePreset.knobInfo[indexId].CHANNELS >> 4;
         uint8_t channel_b = device.activePreset.knobInfo[indexId].CHANNELS & 0xF;
         uint8_t output_a = device.activePreset.knobInfo[indexId].OUTPUTS >> 2;
@@ -122,7 +122,7 @@ void sendActivePreset()
         uint8_t knobsData[15] = {
             SHIK_MANUFACTURER_ID,
             SYNC_KNOBS,
-            pgm_read_word_near(knobsLocation + i),
+            pgm_read_byte_near(knobsLocation + i),
             device.activePreset.knobInfo[indexId].MSB,
             device.activePreset.knobInfo[indexId].LSB,
             channel_a,

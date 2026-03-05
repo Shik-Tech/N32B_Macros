@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include "definitions.h"
+#include "devices.h"
 #include "storage.h"
 #include <MidiInterfaces/MidiInterfaces.h>
 

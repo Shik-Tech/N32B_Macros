@@ -21,7 +21,8 @@ constexpr uint16_t kAdc14BitMax = 16383;
 
 constexpr uint8_t INTERFACE_SYSEX_MAX_LENGTH = 64;
 
-const uint8_t firmwareVersion[] PROGMEM = {4, 5, 6};
+constexpr uint8_t kFirmwareSignatureLen = 3;
+const uint8_t firmwareVersion[] PROGMEM = {4, 5, 7};
 
 #define LONG_PRESS_THRESHOLD 1000
 #define reset_timeout 4000 // Reset to factory preset timeout

@@ -10,14 +10,40 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-#include "devices.h"
-
+/**
+ * Returns true if EEPROM contains a valid firmware signature at the end.
+ *
+ * @return true if signature matches firmwareVersion, false otherwise.
+ *
+ * @note Returns false if EEPROM.length() < kFirmwareSignatureLen.
+ */
 bool isEEPROMvalid();
+
+/**
+ * Writes factory default presets to all slots and firmware signature.
+ *
+ * @note Call from main loop only.
+ */
 void formatFactory();
-void loadPreset(uint8_t);
-void savePreset(uint8_t);
+
+/**
+ * Loads the specified preset into RAM and updates the active preset index.
+ *
+ * @param presetNumber Preset slot index (0..NUMBER_OF_PRESETS-1).
+ *
+ * @note Last-used preset is not persisted to EEPROM to avoid wear on byte 0.
+ */
+void loadPreset(uint8_t presetNumber);
+
+/**
+ * Saves the active preset to the specified EEPROM slot.
+ *
+ * @param presetNumber Preset slot index (0..NUMBER_OF_PRESETS-1).
+ */
+void savePreset(uint8_t presetNumber);
 
 #ifndef N32Bv3
+/** N32B knob index to physical mux channel mapping (non-sequential layout). */
 const uint8_t knobsLocation[] PROGMEM = {
     15, 13, 8, 6,
     14, 11, 7, 5,
